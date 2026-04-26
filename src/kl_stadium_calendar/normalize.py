@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import re
-from datetime import UTC, datetime
+from datetime import datetime
 from zoneinfo import ZoneInfo
 
 from .config import DEFAULT_VENUE_ALIASES, VENUE_ALIAS_GROUPS

@@ -84,7 +84,11 @@ def _extract_feed(discovered: DiscoveredSource) -> list[RawEvent]:
 def _extract_api_json(discovered: DiscoveredSource) -> list[RawEvent]:
     payload = json.loads(discovered.fetched.text)
     candidates = _event_candidates(payload)
-    return [_event_from_mapping(discovered, candidate) for candidate in candidates if _event_title(candidate)]
+    return [
+        _event_from_mapping(discovered, candidate)
+        for candidate in candidates
+        if _event_title(candidate)
+    ]
 
 
 def _extract_json_ld(discovered: DiscoveredSource) -> list[RawEvent]:
@@ -104,8 +108,28 @@ def _extract_json_ld(discovered: DiscoveredSource) -> list[RawEvent]:
 
 
 def _extract_html(discovered: DiscoveredSource) -> list[RawEvent]:
+    if "livenation.my/event/" in discovered.url:
+        events = _extract_livenation_event_page(discovered)
+        if events:
+            return events
+
     if "livenation.my" in discovered.url and "tickets-vdp" in discovered.url:
         events = _extract_livenation_venue_page(discovered)
+        if events:
+            return events
+
+    if "starplanet.com.my/show/" in discovered.url:
+        events = _extract_starplanet_show_page(discovered)
+        if events:
+            return events
+
+    if "hellouniverse.asia" in discovered.url:
+        events = _extract_hello_universe_home(discovered)
+        if events:
+            return events
+
+    if "concertarchives.org/venues/" in discovered.url:
+        events = _extract_concert_archives_venue(discovered)
         if events:
             return events
 
@@ -122,9 +146,42 @@ def _extract_html(discovered: DiscoveredSource) -> list[RawEvent]:
     return events
 
 
+def _extract_livenation_event_page(discovered: DiscoveredSource) -> list[RawEvent]:
+    soup = BeautifulSoup(discovered.fetched.text, "html.parser")
+    lines = _text_lines(soup)
+    title = _clean(_first_heading(soup) or "")
+    if not title:
+        return []
+
+    date_index = _line_index(lines, "Show Date:")
+    date_value = _line_after_label(lines, "Show Date:") or _next_matching_line(
+        lines, 0, r"\d{1,2}\s+\w+\s+\d{4}"
+    )
+    time_value = _time_from_line(
+        _next_matching_line(
+            lines,
+            (date_index + 2) if date_index is not None else 0,
+            r"\d{1,2}:\d{2}\s*(am|pm|AM|PM)",
+        )
+    )
+    venue = _line_after_label(lines, "Venue Name:")
+    address = _line_after_label(lines, "Venue Address:")
+    if not date_value or not venue:
+        return []
+
+    event = _base_event(discovered, title)
+    event.start = _parse_first_date(_join_date_time(_strip_weekday(date_value), time_value))
+    event.venue = venue
+    event.address = address
+    event.url = discovered.url
+    event.category = "Concert"
+    event.description = f"{title} at {venue}"
+    return [event]
+
+
 def _extract_livenation_venue_page(discovered: DiscoveredSource) -> list[RawEvent]:
     soup = BeautifulSoup(discovered.fetched.text, "html.parser")
-    text_lines = [line.strip() for line in soup.get_text("\n").splitlines() if line.strip()]
+    text_lines = _text_lines(soup)
     event_links = [
         urljoin(discovered.url, link.get("href"))
         for link in soup.find_all("a", href=True)
@@ -146,13 +203,127 @@ def _extract_livenation_venue_page(discovered: DiscoveredSource) -> list[RawEven
         time_value = _next_livenation_time_line(text_lines, index + 1)
         event = _base_event(discovered, title)
         event.start = _parse_first_date(_join_date_time(_strip_weekday(date_value), time_value))
-        event.venue = discovered.config.venue_aliases[0] if discovered.config.venue_aliases else "Axiata Arena"
+        event.venue = (
+            discovered.config.venue_aliases[0]
+            if discovered.config.venue_aliases
+            else "Axiata Arena"
+        )
         event.address = "217, Bukit Jalil, 57000 Kuala Lumpur, Malaysia"
         event.url = event_links[link_index] if link_index < len(event_links) else discovered.url
         event.category = "Concert"
         event.description = f"{title} at {event.venue}"
         events.append(event)
         link_index += 1
+    return events
+
+
+def _extract_starplanet_show_page(discovered: DiscoveredSource) -> list[RawEvent]:
+    soup = BeautifulSoup(discovered.fetched.text, "html.parser")
+    lines = _text_lines(soup)
+    title = _strip_starplanet_date_prefix(_first_heading(soup) or "")
+    date_pattern = r"\d{1,2}\s+\w+\s+\d{4},.*\d{1,2}:\d{2}\s*(am|pm)"
+    date_index, date_value = _first_line_match(lines, date_pattern)
+    if not title or date_index is None or not date_value:
+        return []
+
+    venue = _next_venue_like_line(lines, date_index + 1)
+    if not venue:
+        return []
+
+    event = _base_event(discovered, title)
+    event.start = _parse_first_date(date_value.replace(",", ""))
+    event.venue = venue
+    event.url = discovered.url
+    event.category = "Concert"
+    event.description = f"{title} at {venue}"
+    return [event]
+
+
+def _extract_hello_universe_home(discovered: DiscoveredSource) -> list[RawEvent]:
+    soup = BeautifulSoup(discovered.fetched.text, "html.parser")
+    lines = _section_lines(_text_lines(soup), "Upcoming Events", "Who We Are")
+    events: list[RawEvent] = []
+    month_names = {
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec",
+    }
+    for index, line in enumerate(lines[:-1]):
+        if line not in month_names or not re.fullmatch(r"\d{1,2}", lines[index + 1]):
+            continue
+        next_index = _next_month_day_index(lines, index + 2, month_names) or len(lines)
+        block = lines[index + 2 : next_index]
+        time_index = _first_index(block, r"\d{1,2}:\d{2}\s*(AM|PM|am|pm)")
+        if time_index is None or time_index < 2 or time_index + 1 >= len(block):
+            continue
+
+        artist = block[time_index - 2]
+        subtitle = block[time_index - 1]
+        year_match = re.search(r"\b(20\d{2})\b", subtitle)
+        if not year_match:
+            continue
+
+        title = f"{artist} {subtitle}"
+        venue = block[time_index + 1]
+        event = _base_event(discovered, title)
+        date_time = f"{line} {lines[index + 1]} {year_match.group(1)} {block[time_index]}"
+        event.start = _parse_first_date(date_time)
+        event.venue = venue
+        event.url = discovered.url
+        event.category = "Concert"
+        if time_index + 2 < len(block):
+            event.description = block[time_index + 2]
+        events.append(event)
+    return events
+
+
+def _extract_concert_archives_venue(discovered: DiscoveredSource) -> list[RawEvent]:
+    soup = BeautifulSoup(discovered.fetched.text, "html.parser")
+    table = soup.find("table", {"id": "band-show-table-condensed"})
+    if table is None:
+        return []
+
+    events: list[RawEvent] = []
+    for row in table.find_all("tr"):
+        cells = row.find_all("td")
+        if len(cells) < 4:
+            continue
+        date_span = cells[0].find("span")
+        date_value = _clean(
+            date_span.get_text(" ", strip=True)
+            if date_span
+            else cells[0].get_text(" ", strip=True)
+        )
+        if not date_value or "Cancelled" in date_value:
+            continue
+        artist_node = cells[1].find("strong")
+        artist = _clean(artist_node.get_text(" ", strip=True) if artist_node else "")
+        tour_node = cells[1].find("p", class_="tour-title")
+        tour = _clean(tour_node.get_text(" ", strip=True) if tour_node else "")
+        title = _join_artist_tour(artist, tour)
+        venue = _clean(cells[2].get_text(" ", strip=True))
+        location = _clean(cells[3].get_text(" ", strip=True))
+        if not title or not venue:
+            continue
+
+        event = _base_event(discovered, title)
+        event.start = _parse_first_date(date_value)
+        event.venue = venue
+        event.address = location
+        link = cells[1].find("a", href=True)
+        event.url = urljoin(discovered.url, link["href"]) if link else discovered.url
+        event.category = "Concert"
+        event.description = f"{title} at {venue}"
+        events.append(event)
     return events
 
 
@@ -203,6 +374,93 @@ def _next_livenation_time_line(lines: list[str], start: int) -> str | None:
             if re.fullmatch(r"\d{1,2}(:\d{2})?\s*(am|pm|AM|PM)", candidate):
                 return candidate
     return None
+
+
+def _next_venue_like_line(lines: list[str], start: int) -> str | None:
+    for line in lines[start : start + 8]:
+        normalized = line.lower()
+        if any(token in normalized for token in ("stadium", "arena", "bukit jalil")):
+            return line
+    return None
+
+
+def _time_from_line(line: str | None) -> str | None:
+    if not line:
+        return None
+    match = re.search(r"\d{1,2}:\d{2}\s*(am|pm|AM|PM)", line)
+    return match.group(0) if match else None
+
+
+def _line_after_label(lines: list[str], label: str) -> str | None:
+    for index, line in enumerate(lines[:-1]):
+        if line == label:
+            return lines[index + 1]
+    return None
+
+
+def _line_index(lines: list[str], label: str) -> int | None:
+    for index, line in enumerate(lines):
+        if line == label:
+            return index
+    return None
+
+
+def _first_line_match(lines: list[str], pattern: str) -> tuple[int | None, str | None]:
+    regex = re.compile(pattern, re.IGNORECASE)
+    for index, line in enumerate(lines):
+        if regex.search(line):
+            return index, line
+    return None, None
+
+
+def _first_index(lines: list[str], pattern: str) -> int | None:
+    regex = re.compile(pattern)
+    for index, line in enumerate(lines):
+        if regex.fullmatch(line):
+            return index
+    return None
+
+
+def _next_month_day_index(lines: list[str], start: int, month_names: set[str]) -> int | None:
+    for index in range(start, len(lines) - 1):
+        if lines[index] in month_names and re.fullmatch(r"\d{1,2}", lines[index + 1]):
+            return index
+    return None
+
+
+def _section_lines(lines: list[str], start_label: str, end_label: str) -> list[str]:
+    try:
+        start = lines.index(start_label) + 1
+    except ValueError:
+        return []
+    try:
+        end = lines.index(end_label, start)
+    except ValueError:
+        end = len(lines)
+    return lines[start:end]
+
+
+def _first_heading(soup: BeautifulSoup) -> str | None:
+    heading = soup.find(["h1", "h2"])
+    if heading is None:
+        return None
+    return heading.get_text(" ", strip=True)
+
+
+def _strip_starplanet_date_prefix(value: str) -> str:
+    return _clean(re.sub(r"^\d{1,2}\s+\w+:\s*", "", value))
+
+
+def _join_artist_tour(artist: str, tour: str) -> str:
+    if not artist:
+        return tour
+    if not tour or artist.lower() in tour.lower():
+        return artist if not tour else tour
+    return f"{artist} {tour}"
+
+
+def _text_lines(soup: BeautifulSoup) -> list[str]:
+    return [line.strip() for line in soup.get_text("\n").splitlines() if line.strip()]
 
 
 def _join_date_time(date_value: str, time_value: str | None) -> str:
@@ -342,7 +600,10 @@ def _parse_first_date(*values: str | None) -> datetime | None:
         if not value:
             continue
         try:
-            if "," in value and any(day in value for day in ("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")):
+            has_weekday = any(
+                day in value for day in ("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
+            )
+            if "," in value and has_weekday:
                 return parsedate_to_datetime(value)
             return parse_datetime(value)
         except (TypeError, ValueError):

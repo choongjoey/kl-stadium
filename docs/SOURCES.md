@@ -40,6 +40,14 @@ Reason: the old configured venue ID redirected to an unrelated venue. Search res
 
 Note: Songkick's formal API requires approved access. The project currently reads only the public venue page and treats Songkick as a corroborating source.
 
+### Concert Archives
+
+Status: enabled.
+
+Use `https://www.concertarchives.org/venues/axiata-arena--930485`.
+
+Reason: the public venue table is readable through ordinary HTTP and provides date, title, venue, and location rows for Axiata Arena. It is fan-maintained, so it stays low priority and is used only as corroboration or as a hint for events missing from official feeds.
+
 ### Live Nation Malaysia
 
 Status: enabled.
@@ -48,6 +56,8 @@ Use `https://www.livenation.my/event/allevents`.
 
 Reason: `/show` returns 404. The current public all-events route is linked from the Live Nation homepage. It does not currently expose simple JSON-LD for every event, so it may report zero raw events until a dedicated parser is added.
 
+`live-nation-post-malone-2026` is a targeted public HTML scrape of the official event detail page. It is restricted to HTML because the page's JSON-LD is not the event payload used by the extractor.
+
 ### Live Nation Axiata Arena
 
 Status: enabled.
@@ -55,6 +65,22 @@ Status: enabled.
 Use `https://www.livenation.my/axiata-arena-tickets-vdp1009607`.
 
 Reason: Axiata Arena is part of the Bukit Jalil venue cluster and has its own Live Nation venue listing. The source is venue-restricted to Axiata Arena aliases.
+
+### Star Planet
+
+Status: enabled.
+
+Use `https://starplanet.com.my/show/gemkl2026/`.
+
+Reason: the public Star Planet event detail page exposes the event title, date, time, and venue in stable server-rendered HTML. It is restricted to HTML because the embedded JSON-LD is generic site metadata rather than an event object.
+
+### Hello Universe
+
+Status: enabled.
+
+Use `https://www.hellouniverse.asia/`.
+
+Reason: the public homepage lists upcoming Bukit Jalil National Stadium events in server-rendered HTML, including date, time, venue, and short descriptions.
 
 ### Eventbrite
 

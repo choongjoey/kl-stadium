@@ -20,6 +20,14 @@
     "priority": 10
   },
   {
+    "id": "live-nation-post-malone-2026",
+    "name": "Live Nation Post Malone 2026",
+    "url": "https://www.livenation.my/event/post-malone-presents-the-big-stadium-world-tour-kuala-lumpur-tickets-edp1664612",
+    "priority": 10,
+    "allowed_methods": ["html"],
+    "venue_aliases": ["TM Stadium Nasional", "TM Stadium National", "National Stadium Bukit Jalil", "Bukit Jalil National Stadium"]
+  },
+  {
     "id": "live-nation-axiata-arena",
     "name": "Live Nation Axiata Arena",
     "url": "https://www.livenation.my/axiata-arena-tickets-vdp1009607",
@@ -33,6 +41,22 @@
     "priority": 25
   },
   {
+    "id": "starplanet-gem-2026",
+    "name": "Star Planet G.E.M. 2026",
+    "url": "https://starplanet.com.my/show/gemkl2026/",
+    "priority": 10,
+    "allowed_methods": ["html"],
+    "venue_aliases": ["TM National Stadium Bukit Jalil", "National Stadium Bukit Jalil", "Bukit Jalil National Stadium"]
+  },
+  {
+    "id": "hello-universe-events",
+    "name": "Hello Universe Events",
+    "url": "https://www.hellouniverse.asia/",
+    "priority": 12,
+    "allowed_methods": ["html"],
+    "venue_aliases": ["Bukit Jalil National Stadium", "National Stadium Bukit Jalil"]
+  },
+  {
     "id": "kl-events-calendar",
     "name": "KL Events Calendar",
     "url": "https://kleventscalendar.my/wp-json/tribe/events/v1/events?per_page=50&search=Bukit%20Jalil",
@@ -44,6 +68,15 @@
     "name": "Songkick Bukit Jalil Venue",
     "url": "https://www.songkick.com/venues/94862-tm-national-stadium",
     "priority": 70
+  },
+  {
+    "id": "concert-archives-axiata",
+    "name": "Concert Archives Axiata Arena",
+    "url": "https://www.concertarchives.org/venues/axiata-arena--930485",
+    "priority": 85,
+    "allowed_methods": ["html"],
+    "venue_aliases": ["Axiata Arena", "Unifi Arena", "Putra Indoor Stadium", "Putra Stadium", "Stadium Putra"],
+    "note": "Public fan-maintained venue table; use as low-priority corroboration only."
   },
   {
     "id": "jambase-venue",

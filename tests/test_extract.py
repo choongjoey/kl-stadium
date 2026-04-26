@@ -128,3 +128,110 @@ def test_extracts_live_nation_venue_page_events():
     assert events[0].venue == "Axiata Arena"
     assert events[0].url.endswith("tickets-edp1624599")
     assert events[1].start.hour == 20
+
+
+def test_extracts_live_nation_event_detail_page():
+    html = """
+    <html><body>
+      <h1>Post Malone Presents The BIG Stadium World Tour</h1>
+      <p>Show Date:</p>
+      <p>27 September 2026</p>
+      <p>(Sunday), 8:30PM</p>
+      <p>Venue Name:</p>
+      <p>TM Stadium Nasional (Previously known as National Stadium Bukit Jalil)</p>
+      <p>Venue Address:</p>
+      <p>Jalan Barat, Bukit Jalil, 57000 Kuala Lumpur</p>
+    </body></html>
+    """
+
+    events = extract_events(
+        discovered(
+            SourceMethod.HTML,
+            html,
+            url="https://www.livenation.my/event/post-malone-kuala-lumpur-tickets",
+        )
+    )
+
+    assert len(events) == 1
+    assert events[0].title == "Post Malone Presents The BIG Stadium World Tour"
+    assert events[0].start.hour == 20
+    assert events[0].start.minute == 30
+    assert events[0].venue.startswith("TM Stadium Nasional")
+
+
+def test_extracts_starplanet_show_page():
+    html = """
+    <html><body>
+      <h1>06 June: G.E.M. I AM GLORIA World Tour 2.0 - Kuala Lumpur 2026</h1>
+      <p>06 Jun 2026, Sat 8:00 pm</p>
+      <p>TM National Stadium Bukit Jalil, KL</p>
+    </body></html>
+    """
+
+    events = extract_events(
+        discovered(SourceMethod.HTML, html, url="https://starplanet.com.my/show/gemkl2026/")
+    )
+
+    assert len(events) == 1
+    assert events[0].title == "G.E.M. I AM GLORIA World Tour 2.0 - Kuala Lumpur 2026"
+    assert events[0].start.hour == 20
+    assert events[0].venue == "TM National Stadium Bukit Jalil, KL"
+
+
+def test_extracts_hello_universe_upcoming_events():
+    html = """
+    <html><body>
+      <h2>Upcoming Events</h2>
+      <p>Nov</p><p>19</p>
+      <p>Rock</p><p>International</p><p>Concert</p>
+      <h3>My Chemical Romance</h3>
+      <p>Live in Kuala Lumpur 2026 - Day 1</p>
+      <p>08:00 PM</p>
+      <p>Bukit Jalil National Stadium</p>
+      <p>The legendary rock band returns.</p>
+      <h2>Who We Are</h2>
+    </body></html>
+    """
+
+    events = extract_events(
+        discovered(SourceMethod.HTML, html, url="https://www.hellouniverse.asia/")
+    )
+
+    assert len(events) == 1
+    assert events[0].title == "My Chemical Romance Live in Kuala Lumpur 2026 - Day 1"
+    assert events[0].start.month == 11
+    assert events[0].venue == "Bukit Jalil National Stadium"
+
+
+def test_extracts_concert_archives_venue_table():
+    html = """
+    <html><body>
+      <table id="band-show-table-condensed">
+        <tbody>
+          <tr>
+            <td><span>Jun 06, 2026</span></td>
+            <td>
+              <strong><a href="/concerts/dewa-19">Dewa 19</a></strong>
+              <p class="tour-title">Dewa 19 - Cintaku Tertinggal di Malaysia</p>
+            </td>
+            <td><a>Axiata Arena</a></td>
+            <td><a>Bukit Jalil, Kuala Lumpur, Malaysia</a></td>
+            <td></td>
+          </tr>
+        </tbody>
+      </table>
+    </body></html>
+    """
+
+    events = extract_events(
+        discovered(
+            SourceMethod.HTML,
+            html,
+            url="https://www.concertarchives.org/venues/axiata-arena--930485",
+        )
+    )
+
+    assert len(events) == 1
+    assert events[0].title == "Dewa 19 - Cintaku Tertinggal di Malaysia"
+    assert events[0].venue == "Axiata Arena"
+    assert events[0].url == "https://www.concertarchives.org/concerts/dewa-19"
