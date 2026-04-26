@@ -1,0 +1,77 @@
+[
+  {
+    "title": "Malaysia Cup Final: Johor Darul Ta'zim vs Kuching City",
+    "start": "2026-05-23T21:00:00+08:00",
+    "venue": "Stadium Nasional Bukit Jalil",
+    "address": "Jalan Barat, Bukit Jalil, 57000 Kuala Lumpur, Malaysia",
+    "category": "Sports",
+    "url": "https://www.sarawaktribune.com/mfl-confirms-malaysia-cup-final-on-may-23/",
+    "description": "Malaysia Cup 2025-2026 final confirmed at Stadium Nasional Bukit Jalil.",
+    "source": {
+      "id": "seed-mfl-malaysia-cup-final-2026",
+      "name": "MFL confirmation via Sarawak Tribune",
+      "url": "https://www.sarawaktribune.com/mfl-confirms-malaysia-cup-final-on-may-23/",
+      "priority": 12
+    }
+  },
+  {
+    "title": "G.E.M. I AM GLORIA World Tour 2.0",
+    "start": "2026-06-06T20:00:00+08:00",
+    "venue": "TM National Stadium Bukit Jalil",
+    "address": "Jalan Barat, Bukit Jalil, 57000 Kuala Lumpur, Malaysia",
+    "category": "Concert",
+    "url": "https://starplanet.com.my/show/gemkl2026/",
+    "description": "Star Planet event page lists the Kuala Lumpur show at TM National Stadium Bukit Jalil.",
+    "source": {
+      "id": "seed-starplanet-gem-2026",
+      "name": "Star Planet",
+      "url": "https://starplanet.com.my/show/gemkl2026/",
+      "priority": 5
+    }
+  },
+  {
+    "title": "Post Malone Presents The BIG Stadium World Tour",
+    "start": "2026-09-27T20:30:00+08:00",
+    "venue": "TM Stadium Nasional",
+    "address": "Jalan Barat, Bukit Jalil, 57000 Kuala Lumpur, Malaysia",
+    "category": "Concert",
+    "url": "https://www.livenation.my/event/post-malone-presents-the-big-stadium-world-tour-kuala-lumpur-tickets-edp1664612",
+    "description": "Live Nation Malaysia event page lists the Kuala Lumpur show at TM Stadium Nasional.",
+    "source": {
+      "id": "seed-livenation-post-malone-2026",
+      "name": "Live Nation Malaysia",
+      "url": "https://www.livenation.my/event/post-malone-presents-the-big-stadium-world-tour-kuala-lumpur-tickets-edp1664612",
+      "priority": 5
+    }
+  },
+  {
+    "title": "My Chemical Romance Live in Kuala Lumpur 2026 - Day 1",
+    "start": "2026-11-19T20:00:00+08:00",
+    "venue": "Bukit Jalil National Stadium",
+    "address": "Jalan Barat, Bukit Jalil, 57000 Kuala Lumpur, Malaysia",
+    "category": "Concert",
+    "url": "https://www.hellouniverse.asia/",
+    "description": "Hello Universe lists Day 1 of My Chemical Romance at Bukit Jalil National Stadium.",
+    "source": {
+      "id": "seed-hello-universe-mcr-2026",
+      "name": "Hello Universe",
+      "url": "https://www.hellouniverse.asia/",
+      "priority": 8
+    }
+  },
+  {
+    "title": "My Chemical Romance Live in Kuala Lumpur 2026 - Day 2",
+    "start": "2026-11-20T20:00:00+08:00",
+    "venue": "Bukit Jalil National Stadium",
+    "address": "Jalan Barat, Bukit Jalil, 57000 Kuala Lumpur, Malaysia",
+    "category": "Concert",
+    "url": "https://www.hellouniverse.asia/",
+    "description": "Hello Universe lists Day 2 of My Chemical Romance at Bukit Jalil National Stadium.",
+    "source": {
+      "id": "seed-hello-universe-mcr-2026",
+      "name": "Hello Universe",
+      "url": "https://www.hellouniverse.asia/",
+      "priority": 8
+    }
+  }
+]

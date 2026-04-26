@@ -1,0 +1,61 @@
+[
+  {
+    "id": "ticket2u-search",
+    "name": "Ticket2U Bukit Jalil Search",
+    "url": "https://www.ticket2u.com.my/events?keyword=Bukit%20Jalil%20National%20Stadium",
+    "priority": 20,
+    "enabled": false,
+    "note": "Generic Ticket2U search URL returns 404 or Cloudflare 403 to public HTTP clients. Use search-indexed event detail pages as manual seeds until a public feed/API is found."
+  },
+  {
+    "id": "eventbrite-search",
+    "name": "Eventbrite Bukit Jalil Search",
+    "url": "https://www.eventbrite.com/d/malaysia--kuala-lumpur/bukit-jalil-national-stadium/",
+    "priority": 30
+  },
+  {
+    "id": "live-nation-malaysia",
+    "name": "Live Nation Malaysia",
+    "url": "https://www.livenation.my/event/allevents",
+    "priority": 10
+  },
+  {
+    "id": "ticketmelon-search",
+    "name": "Ticketmelon Bukit Jalil Search",
+    "url": "https://www.ticketmelon.com/search?q=Bukit%20Jalil%20National%20Stadium",
+    "priority": 25
+  },
+  {
+    "id": "kl-events-calendar",
+    "name": "KL Events Calendar",
+    "url": "https://kleventscalendar.my/wp-json/tribe/events/v1/events?per_page=50&search=Bukit%20Jalil",
+    "priority": 60,
+    "allowed_methods": ["api_json"]
+  },
+  {
+    "id": "songkick-venue",
+    "name": "Songkick Bukit Jalil Venue",
+    "url": "https://www.songkick.com/venues/94862-tm-national-stadium",
+    "priority": 70
+  },
+  {
+    "id": "jambase-venue",
+    "name": "JamBase Bukit Jalil Venue",
+    "url": "https://www.jambase.com/venue/bukit-jalil-national-stadium",
+    "priority": 75,
+    "enabled": false,
+    "note": "JamBase returns a 403 managed challenge for automated public HTTP clients. Do not bypass; use it only for manual research unless they expose an allowed feed/API."
+  },
+  {
+    "id": "mfl",
+    "name": "Malaysian Football League",
+    "url": "https://www.malaysianfootballleague.com/",
+    "priority": 15
+  },
+  {
+    "id": "fam",
+    "name": "Football Association of Malaysia",
+    "url": "https://fam.org.my/",
+    "priority": 15
+  }
+]
