@@ -55,7 +55,11 @@ def _tokens(value: str) -> set[str]:
         "an",
         "and",
         "at",
+        "arena",
+        "axiata",
         "bukit",
+        "concert",
+        "hockey",
         "in",
         "jalil",
         "live",
@@ -65,9 +69,14 @@ def _tokens(value: str) -> set[str]:
         "the",
         "tm",
         "tour",
+        "unifi",
         "world",
     }
-    return {token for token in re.findall(r"[a-z0-9]+", value.lower()) if token not in stopwords}
+    return {
+        token
+        for token in re.findall(r"[a-z0-9]+", value.lower())
+        if token not in stopwords and not re.fullmatch(r"20\d{2}", token)
+    }
 
 
 def _norm(value: str) -> str:

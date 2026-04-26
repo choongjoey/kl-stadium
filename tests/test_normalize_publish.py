@@ -70,6 +70,50 @@ def test_dedupes_same_event_same_date():
     assert len(events[0].sources) == 2
 
 
+def test_dedupes_titles_with_venue_suffixes():
+    sources = {
+        "official": SourceConfig("official", "Official", "https://example.test", priority=10),
+        "aggregator": SourceConfig("aggregator", "Aggregator", "https://example.test", priority=80),
+    }
+    event_a = raw("EXO PLANET #6 - EXhOrizon in KUALA LUMPUR", "official")
+    event_a.venue = "National Hockey Stadium"
+    event_b = raw("EXO @ National Hockey Stadium", "aggregator")
+    event_b.venue = "National Hockey Stadium"
+
+    events = dedupe_events(
+        normalize_events(
+            [event_a, event_b],
+            sources,
+            now=datetime(2026, 1, 1, tzinfo=ZoneInfo("Asia/Kuala_Lumpur")),
+        )
+    )
+
+    assert len(events) == 1
+    assert len(events[0].sources) == 2
+
+
+def test_dedupes_generic_event_listing_title():
+    sources = {
+        "official": SourceConfig("official", "Official", "https://example.test", priority=10),
+        "aggregator": SourceConfig("aggregator", "Aggregator", "https://example.test", priority=80),
+    }
+    event_a = raw("EXO PLANET #6 - EXhOrizon in KUALA LUMPUR", "official")
+    event_a.venue = "National Hockey Stadium"
+    event_b = raw("EXO Concert 2026 (Kuala Lumpur, Malaysia)", "aggregator")
+    event_b.venue = "National Hockey Stadium"
+
+    events = dedupe_events(
+        normalize_events(
+            [event_a, event_b],
+            sources,
+            now=datetime(2026, 1, 1, tzinfo=ZoneInfo("Asia/Kuala_Lumpur")),
+        )
+    )
+
+    assert len(events) == 1
+    assert len(events[0].sources) == 2
+
+
 def test_writes_valid_calendar(tmp_path):
     sources = {"official": SourceConfig("official", "Official", "https://example.test", priority=10)}
     events = normalize_events(

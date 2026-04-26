@@ -40,6 +40,8 @@ Reason: the old configured venue ID redirected to an unrelated venue. Search res
 
 Note: Songkick's formal API requires approved access. The project currently reads only the public venue page and treats Songkick as a corroborating source.
 
+`songkick-axiata-arena` reads the public Axiata/Unifi Arena venue page and contributes corroborating concert rows through embedded JSON-LD. `songkick-national-hockey-exo-2026` reads the public EXO event page as a National Hockey Stadium corroborating source.
+
 ### Concert Archives
 
 Status: enabled.
@@ -47,6 +49,14 @@ Status: enabled.
 Use `https://www.concertarchives.org/venues/axiata-arena--930485`.
 
 Reason: the public venue table is readable through ordinary HTTP and provides date, title, venue, and location rows for Axiata Arena. It is fan-maintained, so it stays low priority and is used only as corroboration or as a hint for events missing from official feeds.
+
+### Concerts50
+
+Status: enabled.
+
+Use `https://concerts50.com/venues/malaysia/kuala-lumpur/axiata-arena`.
+
+Reason: the public venue page exposes event JSON-LD for Axiata Arena, including several events not yet visible on higher-priority official pages. It is restricted to JSON-LD because the page links unrelated JSON alternates such as the web app manifest.
 
 ### Live Nation Malaysia
 
@@ -73,6 +83,16 @@ Status: enabled.
 Use `https://starplanet.com.my/show/gemkl2026/`.
 
 Reason: the public Star Planet event detail page exposes the event title, date, time, and venue in stable server-rendered HTML. It is restricted to HTML because the embedded JSON-LD is generic site metadata rather than an event object.
+
+`starplanet-exo-2026` uses the same public HTML shape for EXO at National Hockey Stadium.
+
+### EverythingBoleh
+
+Status: enabled.
+
+Use `https://everythingboleh.com/event/exo-concert-2026/`.
+
+Reason: the public event detail page exposes event JSON-LD with date, time, venue, and address. It is low priority and restricted to JSON-LD because its iCal alternate currently returns 403 to ordinary public HTTP clients.
 
 ### Hello Universe
 

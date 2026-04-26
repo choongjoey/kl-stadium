@@ -49,6 +49,14 @@
     "venue_aliases": ["TM National Stadium Bukit Jalil", "National Stadium Bukit Jalil", "Bukit Jalil National Stadium"]
   },
   {
+    "id": "starplanet-exo-2026",
+    "name": "Star Planet EXO 2026",
+    "url": "https://starplanet.com.my/show/exokl2026/",
+    "priority": 10,
+    "allowed_methods": ["html"],
+    "venue_aliases": ["National Hockey Stadium Bukit Jalil", "National Hockey Stadium", "Stadium Hoki Nasional"]
+  },
+  {
     "id": "hello-universe-events",
     "name": "Hello Universe Events",
     "url": "https://www.hellouniverse.asia/",
@@ -70,6 +78,21 @@
     "priority": 70
   },
   {
+    "id": "songkick-axiata-arena",
+    "name": "Songkick Axiata Arena Venue",
+    "url": "https://tickets.songkick.com/venues/3632319-axiata-arena",
+    "priority": 72,
+    "venue_aliases": ["Axiata Arena", "Unifi Arena", "Putra Indoor Stadium", "Putra Stadium", "Stadium Putra"],
+    "note": "Public venue page currently redirects to Songkick's Unifi Arena name for the same arena."
+  },
+  {
+    "id": "songkick-national-hockey-exo-2026",
+    "name": "Songkick EXO National Hockey Stadium 2026",
+    "url": "https://www.songkick.com/concerts/43029490-exo-at-national-hockey-stadium",
+    "priority": 72,
+    "venue_aliases": ["National Hockey Stadium", "National Hockey Stadium Bukit Jalil", "Stadium Hoki Nasional"]
+  },
+  {
     "id": "concert-archives-axiata",
     "name": "Concert Archives Axiata Arena",
     "url": "https://www.concertarchives.org/venues/axiata-arena--930485",
@@ -77,6 +100,24 @@
     "allowed_methods": ["html"],
     "venue_aliases": ["Axiata Arena", "Unifi Arena", "Putra Indoor Stadium", "Putra Stadium", "Stadium Putra"],
     "note": "Public fan-maintained venue table; use as low-priority corroboration only."
+  },
+  {
+    "id": "concerts50-axiata",
+    "name": "Concerts50 Axiata Arena",
+    "url": "https://concerts50.com/venues/malaysia/kuala-lumpur/axiata-arena",
+    "priority": 88,
+    "allowed_methods": ["json_ld"],
+    "venue_aliases": ["Axiata Arena", "Unifi Arena", "Putra Indoor Stadium", "Putra Stadium", "Stadium Putra"],
+    "note": "Public aggregator with JSON-LD; use as low-priority corroboration only."
+  },
+  {
+    "id": "everythingboleh-exo-2026",
+    "name": "EverythingBoleh EXO 2026",
+    "url": "https://everythingboleh.com/event/exo-concert-2026/",
+    "priority": 90,
+    "allowed_methods": ["json_ld"],
+    "venue_aliases": ["National Hockey Stadium", "National Hockey Stadium Bukit Jalil", "Stadium Hoki Nasional"],
+    "note": "Public event listing with JSON-LD; use as low-priority corroboration only."
   },
   {
     "id": "jambase-venue",

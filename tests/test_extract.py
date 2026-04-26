@@ -43,6 +43,31 @@ def test_extracts_json_ld_event():
     assert events[0].start.year == 2026
 
 
+def test_extracts_json_ld_ignores_site_metadata():
+    html = """
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {"@type": "Organization", "name": "Promoter"},
+        {"@type": "BreadcrumbList", "name": "All Events"},
+        {
+          "@type": "MusicEvent",
+          "name": "EXO PLANET #6",
+          "startDate": "2026-06-20T20:00:00+08:00",
+          "location": {"@type": "Place", "name": "National Hockey Stadium"}
+        }
+      ]
+    }
+    </script>
+    """
+
+    events = extract_events(discovered(SourceMethod.JSON_LD, html))
+
+    assert len(events) == 1
+    assert events[0].title == "EXO PLANET #6"
+
+
 def test_extracts_ics_event():
     ics = """BEGIN:VCALENDAR
 VERSION:2.0

@@ -481,10 +481,10 @@ def _event_candidates(payload: Any) -> list[dict[str, Any]]:
     elif isinstance(payload, dict):
         item_type = payload.get("@type") or payload.get("type")
         if isinstance(item_type, list):
-            is_event = "Event" in item_type
+            is_event = any(str(item).lower().endswith("event") for item in item_type)
         else:
             is_event = str(item_type).lower().endswith("event")
-        if is_event or {"startDate", "start_date", "name"}.intersection(payload):
+        if is_event or {"startDate", "start_date"}.intersection(payload):
             candidates.append(payload)
         for key in ("@graph", "events", "data", "results", "items"):
             if key in payload:
