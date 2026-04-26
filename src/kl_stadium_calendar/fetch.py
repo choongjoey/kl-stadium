@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Any
 
 import requests
+from requests.utils import get_encoding_from_headers
 
 from .models import FetchResult
 
@@ -24,7 +26,8 @@ class Fetcher:
             timeout=self.timeout_seconds,
         )
         response.raise_for_status()
-        response.encoding = response.encoding or response.apparent_encoding
+        if get_encoding_from_headers(response.headers) is None:
+            response.encoding = response.apparent_encoding
         return FetchResult(
             url=url,
             final_url=response.url,
@@ -34,3 +37,25 @@ class Fetcher:
             headers={key.lower(): value for key, value in response.headers.items()},
         )
 
+    def post_json(self, url: str, payload: dict[str, Any]) -> FetchResult:
+        response = requests.post(
+            url,
+            headers={
+                "Accept": "application/json,text/plain;q=0.9,*/*;q=0.7",
+                "Content-Type": "application/json",
+                "User-Agent": self.user_agent,
+            },
+            json=payload,
+            timeout=self.timeout_seconds,
+        )
+        response.raise_for_status()
+        if get_encoding_from_headers(response.headers) is None:
+            response.encoding = response.apparent_encoding
+        return FetchResult(
+            url=url,
+            final_url=response.url,
+            status_code=response.status_code,
+            content_type=response.headers.get("content-type", ""),
+            text=response.text,
+            headers={key.lower(): value for key, value in response.headers.items()},
+        )

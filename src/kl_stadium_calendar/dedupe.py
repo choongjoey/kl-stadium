@@ -15,7 +15,7 @@ def dedupe_events(events: list[Event]) -> list[Event]:
         if existing is None:
             merged[key] = event
             continue
-        existing.sources.extend(event.sources)
+        _append_sources(existing, event)
         existing.confidence = max(existing.confidence, event.confidence)
         if not existing.url and event.url:
             existing.url = event.url
@@ -26,6 +26,19 @@ def dedupe_events(events: list[Event]) -> list[Event]:
         if existing.end is None and event.end is not None:
             existing.end = event.end
     return sorted(merged.values(), key=lambda item: (item.start, item.title))
+
+
+def _append_sources(existing: Event, event: Event) -> None:
+    seen = {
+        (source.get("id"), source.get("url"), source.get("method"))
+        for source in existing.sources
+    }
+    for source in event.sources:
+        key = (source.get("id"), source.get("url"), source.get("method"))
+        if key in seen:
+            continue
+        seen.add(key)
+        existing.sources.append(source)
 
 
 def _matching_key(merged: dict[tuple[str, str, str], Event], event: Event) -> tuple[str, str, str] | None:

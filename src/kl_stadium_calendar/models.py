@@ -26,6 +26,8 @@ class SourceConfig:
     venue_aliases: tuple[str, ...] = ()
     enabled: bool = True
     note: str | None = None
+    request_json: dict[str, Any] | None = None
+    request_pages: int = 1
 
 
 @dataclass(frozen=True)

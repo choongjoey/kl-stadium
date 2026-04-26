@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import copy
+import json
 import re
 from urllib.parse import urljoin
 
@@ -19,6 +21,12 @@ METHOD_ORDER = (
 
 
 def discover_source(source: SourceConfig, fetcher: Fetcher) -> DiscoveredSource:
+    if source.request_json is not None:
+        fetched = _fetch_json_request(source, fetcher)
+        method = _classify_direct(fetched)
+        if method and _allowed(source, method):
+            return DiscoveredSource(source, method, fetched.final_url, f"direct {method.value}", fetched)
+
     first = fetcher.get(source.url)
     method = _classify_direct(first)
     if method and _allowed(source, method):
@@ -49,6 +57,46 @@ def discover_source(source: SourceConfig, fetcher: Fetcher) -> DiscoveredSource:
         return DiscoveredSource(source, SourceMethod.HTML, first.final_url, "HTML fallback", first)
 
     raise ValueError(f"{source.id}: no supported source method discovered")
+
+
+def _fetch_json_request(source: SourceConfig, fetcher: Fetcher) -> FetchResult:
+    first = fetcher.post_json(source.url, source.request_json or {})
+    pages = max(1, source.request_pages)
+    if pages == 1:
+        return first
+
+    try:
+        payload = json.loads(first.text)
+    except json.JSONDecodeError:
+        return first
+    if not isinstance(payload, dict) or not isinstance(payload.get("data"), list):
+        return first
+
+    for page in range(2, pages + 1):
+        request_json = copy.deepcopy(source.request_json or {})
+        data = request_json.setdefault("data", {})
+        if not isinstance(data, dict):
+            break
+        data["currentpage"] = page
+        page_result = fetcher.post_json(source.url, request_json)
+        try:
+            page_payload = json.loads(page_result.text)
+        except json.JSONDecodeError:
+            break
+        page_data = page_payload.get("data") if isinstance(page_payload, dict) else None
+        if not page_data:
+            break
+        if isinstance(page_data, list):
+            payload["data"].extend(page_data)
+
+    return FetchResult(
+        url=first.url,
+        final_url=first.final_url,
+        status_code=first.status_code,
+        content_type=first.content_type,
+        text=json.dumps(payload),
+        headers=first.headers,
+    )
 
 
 def _allowed(source: SourceConfig, method: SourceMethod) -> bool:

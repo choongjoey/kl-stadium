@@ -50,6 +50,8 @@ def load_sources(path: Path) -> list[SourceConfig]:
                 venue_aliases=aliases,
                 enabled=bool(item.get("enabled", True)),
                 note=item.get("note"),
+                request_json=item.get("request_json"),
+                request_pages=int(item.get("request_pages", 1)),
             )
         )
     return sources

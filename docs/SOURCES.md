@@ -18,8 +18,8 @@ Do not add source-specific parsing until these options fail.
 
 Latest local run:
 
-- 14 normalized upcoming events.
-- 23 configured sources, including manual seeds.
+- 16 normalized upcoming events.
+- 30 configured sources, including manual seeds.
 - 0 failed sources.
 
 ### Manual Seed Events
@@ -64,6 +64,14 @@ Use `https://concerts50.com/venues/malaysia/kuala-lumpur/axiata-arena`.
 
 Reason: the public venue page exposes event JSON-LD for Axiata Arena, including several events not yet visible on higher-priority official pages. It is restricted to JSON-LD because the page links unrelated JSON alternates such as the web app manifest.
 
+### Expolah
+
+Status: enabled for targeted event detail pages.
+
+Use `https://expolah.com/event/gem-world-tour-2026-stadium-bukit-jalil/` and `https://expolah.com/event/sun-yanzi-in-concert-2026-bukit-jalil/`.
+
+Reason: Expolah event detail pages are readable and expose Event JSON-LD. They are useful as low-priority alternates for Chinese/Mandopop events and for checking Chinese-language artist coverage. The broader Bukit Jalil location listing is not enabled yet because it still lists some rescheduled events under old dates; targeted detail pages are safer.
+
 ### Live Nation Malaysia
 
 Status: enabled.
@@ -81,6 +89,8 @@ Status: enabled.
 Use `https://www.livenation.my/axiata-arena-tickets-vdp1009607`.
 
 Reason: Axiata Arena is part of the Bukit Jalil venue cluster and has its own Live Nation venue listing. The source is venue-restricted to Axiata Arena aliases.
+
+`live-nation-lany-2026` is a targeted official event detail page for LANY at Unifi Arena. It is restricted to HTML for the same reason as other Live Nation detail pages.
 
 ### Star Planet
 
@@ -122,15 +132,21 @@ The public search page is readable but currently yields no structured stadium ev
 
 ### MFL and FAM
 
-Status: enabled.
+Status: enabled as monitored sports sources.
 
-Both public homepages are readable. They currently need sport-specific fixture parsing or better fixture endpoints before they can contribute events automatically.
+Use `https://www.malaysianfootballleague.com/Home/Sport` and `https://fam.org.my/men-team/results` in addition to the MFL and FAM homepages.
+
+Reason: the official MFL matches page and FAM men's team match listing are more specific than the homepages. The current MFL page renders a public HTML shell without fixture rows, and the FAM page currently lists recent or older matches rather than future Bukit Jalil home fixtures. Keep them enabled with zero-event extraction while searching for an allowed fixture endpoint or adding a narrow parser once future stadium fixtures appear.
 
 ### Ticket2U
 
-Status: skipped.
+Status: generic legacy search skipped; public eventlisting API enabled.
 
-The generic Ticket2U search URL returns 404, and the homepage returns Cloudflare 403 to normal public HTTP clients. Do not bypass this. Use search-indexed public event detail pages as manual seed references unless Ticket2U exposes a stable public feed or API.
+`ticket2u-concerts` and `ticket2u-sports` use `https://www.ticket2u.com.my/api/api2.ashx` with the public `eventlisting` POST payload used by Ticket2U's own `/event/list` page. The source fetches paginated concert and sports listings, then the normal venue filter keeps only Bukit Jalil cluster events.
+
+Reason: this is generic enough to discover Ticket2U-listed Axiata Arena, Unifi Arena, National Hockey Stadium, and Bukit Jalil stadium events without adding a source per artist. It also covers Malay, Indonesian, Indian, Chinese, K-pop, and sports listings when Ticket2U carries them.
+
+The old `/events?...` search URL still returns a 404 shell, and the homepage can return Cloudflare 403 to normal public HTTP clients. Do not bypass this. Use the public eventlisting endpoint or search-indexed public event detail pages only.
 
 ### JamBase
 

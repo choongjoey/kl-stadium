@@ -117,6 +117,40 @@ def test_extracts_the_events_calendar_api_event():
     assert events[0].category == "Entertainment"
 
 
+def test_extracts_ticket2u_eventlisting_api_rows():
+    payload = """
+    {
+      "data": [
+        {
+          "row": {
+            "titlename": "DEWA 19 - Cintaku TerTinggal di Malaysia",
+            "datefrom": "2026-06-06T20:30:00",
+            "dateto": "2026-06-06T22:30:00",
+            "locname": "Axiata Arena Bukit Jalil",
+            "eventcat": "Entertainments, Concerts, and Shows Event",
+            "link": "event/48826/dewa-19-cintaku-tertinggal-di-malaysia"
+          }
+        }
+      ]
+    }
+    """
+
+    events = extract_events(
+        discovered(
+            SourceMethod.API_JSON,
+            payload,
+            "application/json",
+            url="https://www.ticket2u.com.my/api/api2.ashx",
+        )
+    )
+
+    assert len(events) == 1
+    assert events[0].title == "DEWA 19 - Cintaku TerTinggal di Malaysia"
+    assert events[0].start.hour == 20
+    assert events[0].venue == "Axiata Arena Bukit Jalil"
+    assert events[0].url == "https://www.ticket2u.com.my/event/48826/dewa-19-cintaku-tertinggal-di-malaysia"
+
+
 def test_extracts_live_nation_venue_page_events():
     html = """
     <html><body>
@@ -182,6 +216,32 @@ def test_extracts_live_nation_event_detail_page():
     assert events[0].start.hour == 20
     assert events[0].start.minute == 30
     assert events[0].venue.startswith("TM Stadium Nasional")
+
+
+def test_extracts_live_nation_event_detail_page_with_inline_weekday_and_time():
+    html = """
+    <html><body>
+      <h1>LANY: soft world tour</h1>
+      <p>Show Date:</p>
+      <p>1 November 2026 (Sunday), 8PM</p>
+      <p>Venue Name:</p>
+      <p>Unifi Arena</p>
+      <p>Venue Address:</p>
+      <p>Bukit Jalil, Kuala Lumpur</p>
+    </body></html>
+    """
+
+    events = extract_events(
+        discovered(
+            SourceMethod.HTML,
+            html,
+            url="https://www.livenation.my/event/lany-soft-world-tour-kuala-lumpur-tickets",
+        )
+    )
+
+    assert len(events) == 1
+    assert events[0].start.hour == 20
+    assert events[0].venue == "Unifi Arena"
 
 
 def test_extracts_starplanet_show_page():
@@ -260,3 +320,32 @@ def test_extracts_concert_archives_venue_table():
     assert events[0].title == "Dewa 19 - Cintaku Tertinggal di Malaysia"
     assert events[0].venue == "Axiata Arena"
     assert events[0].url == "https://www.concertarchives.org/concerts/dewa-19"
+
+
+def test_extracts_ticket2u_event_detail_page():
+    html = """
+    <html><head><title>DEWA 19 - Cintaku TerTinggal di Malaysia | Ticket2u</title></head>
+    <body>
+      <p>DEWA 19 - Cintaku TerTinggal di Malaysia</p>
+      <p>{{$t("Ticket")}}</p>
+      <p>Axiata Arena Bukit Jalil</p>
+      <p>L2-E-10, Enterprise 4, Technology Park Malaysia, Lebuhraya Bukit Jalil, Bukit Jalil</p>
+      <p>Map</p>
+      <p>Waze</p>
+      <p>Google Maps</p>
+      <p>Axiata Arena Bukit Jalil</p>
+      <p>6 Jun 2026, 8:30PM</p>
+      <p>#Entertainments, Concerts, and Shows Event</p>
+      <p>#Concert</p>
+    </body></html>
+    """
+
+    events = extract_events(
+        discovered(SourceMethod.HTML, html, url="https://www.ticket2u.com.my/event/48826")
+    )
+
+    assert len(events) == 1
+    assert events[0].title == "DEWA 19 - Cintaku TerTinggal di Malaysia"
+    assert events[0].start.hour == 20
+    assert events[0].start.minute == 30
+    assert events[0].venue == "Axiata Arena Bukit Jalil"

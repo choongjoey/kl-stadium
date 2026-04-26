@@ -5,7 +5,7 @@
     "url": "https://www.ticket2u.com.my/events?keyword=Bukit%20Jalil%20National%20Stadium",
     "priority": 20,
     "enabled": false,
-    "note": "Generic Ticket2U search URL returns 404 or Cloudflare 403 to public HTTP clients. Use search-indexed event detail pages as manual seeds until a public feed/API is found."
+    "note": "Legacy Ticket2U /events search URL returns a 404 shell to public HTTP clients. Use the public eventlisting API sources instead."
   },
   {
     "id": "eventbrite-search",
@@ -35,10 +35,55 @@
     "venue_aliases": ["Axiata Arena", "Unifi Arena", "Putra Indoor Stadium", "Putra Stadium", "Stadium Putra"]
   },
   {
+    "id": "live-nation-lany-2026",
+    "name": "Live Nation LANY 2026",
+    "url": "https://www.livenation.my/event/lany-soft-world-tour-kuala-lumpur-tickets-edp1661582",
+    "priority": 10,
+    "allowed_methods": ["html"],
+    "venue_aliases": ["Unifi Arena", "Axiata Arena", "Putra Indoor Stadium", "Putra Stadium", "Stadium Putra"]
+  },
+  {
     "id": "ticketmelon-search",
     "name": "Ticketmelon Bukit Jalil Search",
     "url": "https://www.ticketmelon.com/search?q=Bukit%20Jalil",
     "priority": 25
+  },
+  {
+    "id": "ticket2u-concerts",
+    "name": "Ticket2U Concert Listings",
+    "url": "https://www.ticket2u.com.my/api/api2.ashx",
+    "priority": 18,
+    "allowed_methods": ["api_json"],
+    "request_json": {
+      "method": "eventlisting",
+      "data": {
+        "cc": "entertainment",
+        "scc": "concert",
+        "ex": 1,
+        "currentpage": 1,
+        "sort": 3
+      }
+    },
+    "request_pages": 2,
+    "note": "Public Ticket2U eventlisting endpoint for concert listings. Venue filtering keeps only the Bukit Jalil cluster."
+  },
+  {
+    "id": "ticket2u-sports",
+    "name": "Ticket2U Sports Listings",
+    "url": "https://www.ticket2u.com.my/api/api2.ashx",
+    "priority": 35,
+    "allowed_methods": ["api_json"],
+    "request_json": {
+      "method": "eventlisting",
+      "data": {
+        "cc": "sport",
+        "ex": 1,
+        "currentpage": 1,
+        "sort": 3
+      }
+    },
+    "request_pages": 5,
+    "note": "Public Ticket2U eventlisting endpoint for sports listings. Venue filtering keeps only the Bukit Jalil cluster."
   },
   {
     "id": "starplanet-gem-2026",
@@ -55,6 +100,24 @@
     "priority": 10,
     "allowed_methods": ["html"],
     "venue_aliases": ["National Hockey Stadium Bukit Jalil", "National Hockey Stadium", "Stadium Hoki Nasional"]
+  },
+  {
+    "id": "expolah-gem-2026",
+    "name": "Expolah G.E.M. 2026",
+    "url": "https://expolah.com/event/gem-world-tour-2026-stadium-bukit-jalil/",
+    "priority": 82,
+    "allowed_methods": ["json_ld"],
+    "venue_aliases": ["TM National Stadium Bukit Jalil", "National Stadium Bukit Jalil", "Bukit Jalil National Stadium"],
+    "note": "Public event aggregator with Event JSON-LD; low-priority alternate for Chinese/Mandopop event corroboration."
+  },
+  {
+    "id": "expolah-sun-yanzi-2026",
+    "name": "Expolah Sun Yanzi 2026",
+    "url": "https://expolah.com/event/sun-yanzi-in-concert-2026-bukit-jalil/",
+    "priority": 82,
+    "allowed_methods": ["json_ld"],
+    "venue_aliases": ["Unifi Arena", "Axiata Arena", "Putra Indoor Stadium", "Putra Stadium", "Stadium Putra"],
+    "note": "Public event aggregator with Event JSON-LD; low-priority alternate for Chinese/Mandopop event discovery."
   },
   {
     "id": "hello-universe-events",
@@ -134,9 +197,25 @@
     "priority": 15
   },
   {
+    "id": "mfl-matches",
+    "name": "Malaysian Football League Matches",
+    "url": "https://www.malaysianfootballleague.com/Home/Sport",
+    "priority": 15,
+    "allowed_methods": ["html"],
+    "note": "Official matches page. Current public HTML shell does not expose fixture rows to the generic extractor; keep as a monitored sports source while looking for an allowed fixture endpoint."
+  },
+  {
     "id": "fam",
     "name": "Football Association of Malaysia",
     "url": "https://fam.org.my/",
     "priority": 15
+  },
+  {
+    "id": "fam-men-results",
+    "name": "FAM Men's Team Results",
+    "url": "https://fam.org.my/men-team/results",
+    "priority": 16,
+    "allowed_methods": ["html"],
+    "note": "Official FAM men's team match listing. It currently exposes recent and older fixtures in HTML; future Bukit Jalil home fixtures need a dedicated parser once listed."
   }
 ]

@@ -133,6 +133,11 @@ def _extract_html(discovered: DiscoveredSource) -> list[RawEvent]:
         if events:
             return events
 
+    if "ticket2u.com.my/event/" in discovered.url:
+        events = _extract_ticket2u_event_page(discovered)
+        if events:
+            return events
+
     json_ld_source = DiscoveredSource(
         discovered.config,
         SourceMethod.JSON_LD,
@@ -327,6 +332,40 @@ def _extract_concert_archives_venue(discovered: DiscoveredSource) -> list[RawEve
     return events
 
 
+def _extract_ticket2u_event_page(discovered: DiscoveredSource) -> list[RawEvent]:
+    soup = BeautifulSoup(discovered.fetched.text, "html.parser")
+    lines = [
+        line
+        for line in _text_lines(soup)
+        if not line.startswith("{{$t(") and line not in {"Map", "Waze", "Google Maps"}
+    ]
+    title = _clean((soup.title.string if soup.title else "").split("|")[0])
+    if not title:
+        title = _first_non_nav_line(lines)
+    if not title:
+        return []
+
+    date_index, date_value = _first_line_match(
+        lines, r"\d{1,2}\s+\w+\s+20\d{2},\s+\d{1,2}:\d{2}\s*(AM|PM)"
+    )
+    if date_index is None or not date_value:
+        return []
+
+    venue = _previous_venue_line(lines, date_index)
+    address = lines[date_index - 1] if date_index >= 1 and venue != lines[date_index - 1] else None
+    if not venue:
+        return []
+
+    event = _base_event(discovered, title)
+    event.start = _parse_first_date(date_value)
+    event.venue = venue
+    event.address = address
+    event.url = discovered.url
+    event.category = "Concert"
+    event.description = f"{title} at {venue}"
+    return [event]
+
+
 def _next_matching_line(lines: list[str], start: int, pattern: str) -> str | None:
     regex = re.compile(pattern)
     for line in lines[start : start + 5]:
@@ -447,6 +486,28 @@ def _first_heading(soup: BeautifulSoup) -> str | None:
     return heading.get_text(" ", strip=True)
 
 
+def _first_non_nav_line(lines: list[str]) -> str | None:
+    ignored = {
+        "Log In",
+        "Sign Up",
+        "English",
+        "Indonesian",
+        "\ufeff",
+    }
+    for line in lines:
+        if line in ignored or line.startswith("#"):
+            continue
+        return line
+    return None
+
+
+def _previous_venue_line(lines: list[str], date_index: int) -> str | None:
+    for line in reversed(lines[max(0, date_index - 8) : date_index]):
+        if any(token in line.lower() for token in ("stadium", "arena", "bukit jalil")):
+            return line
+    return None
+
+
 def _strip_starplanet_date_prefix(value: str) -> str:
     return _clean(re.sub(r"^\d{1,2}\s+\w+:\s*", "", value))
 
@@ -470,7 +531,7 @@ def _join_date_time(date_value: str, time_value: str | None) -> str:
 
 
 def _strip_weekday(value: str) -> str:
-    return re.sub(r"\s*\([^)]*\)\s*$", "", value).strip()
+    return re.sub(r"\s*\([^)]*\)", "", value).replace(",", " ").strip()
 
 
 def _event_candidates(payload: Any) -> list[dict[str, Any]]:
@@ -486,6 +547,10 @@ def _event_candidates(payload: Any) -> list[dict[str, Any]]:
             is_event = str(item_type).lower().endswith("event")
         if is_event or {"startDate", "start_date"}.intersection(payload):
             candidates.append(payload)
+        if "datefrom" in payload and _event_title(payload):
+            candidates.append(payload)
+        if "row" in payload:
+            candidates.extend(_event_candidates(payload["row"]))
         for key in ("@graph", "events", "data", "results", "items"):
             if key in payload:
                 candidates.extend(_event_candidates(payload[key]))
@@ -501,6 +566,7 @@ def _event_from_mapping(discovered: DiscoveredSource, data: dict[str, Any]) -> R
         _nested(data, "start_date", "local"),
         _nested(data, "start", "local"),
         _nested(data, "start", "utc"),
+        _nested(data, "datefrom"),
     )
     event.end = _parse_first_date(
         _nested(data, "endDate"),
@@ -508,10 +574,14 @@ def _event_from_mapping(discovered: DiscoveredSource, data: dict[str, Any]) -> R
         _nested(data, "end_date", "local"),
         _nested(data, "end", "local"),
         _nested(data, "end", "utc"),
+        _nested(data, "dateto"),
     )
-    event.url = _nested(data, "url") or _nested(data, "event_url")
+    event.url = _event_url(
+        discovered,
+        _nested(data, "url") or _nested(data, "event_url") or _nested(data, "link"),
+    )
     event.category = _category_name(data)
-    event.description = _nested(data, "description") or _nested(data, "summary")
+    event.description = _nested(data, "description") or _nested(data, "summary") or _nested(data, "excerpt")
     event.venue = _location_name(data)
     event.address = _location_address(data)
     event.raw = data
@@ -519,7 +589,18 @@ def _event_from_mapping(discovered: DiscoveredSource, data: dict[str, Any]) -> R
 
 
 def _event_title(data: dict[str, Any]) -> str | None:
-    return _nested(data, "name") or _nested(data, "title")
+    title = _nested(data, "name") or _nested(data, "title") or _nested(data, "titlename")
+    if title:
+        return re.sub(r"^BNPL\s*-\s*", "", title, flags=re.IGNORECASE)
+    return None
+
+
+def _event_url(discovered: DiscoveredSource, value: str | None) -> str | None:
+    if not value:
+        return None
+    if value.startswith("event/") and "ticket2u.com.my" in discovered.url:
+        return urljoin("https://www.ticket2u.com.my/", value)
+    return urljoin(discovered.url, value)
 
 
 def _location_name(data: dict[str, Any]) -> str | None:
@@ -532,7 +613,7 @@ def _location_name(data: dict[str, Any]) -> str | None:
         )
     if isinstance(location, str):
         return location
-    return None
+    return _nested(data, "locname")
 
 
 def _location_address(data: dict[str, Any]) -> str | None:
@@ -574,7 +655,12 @@ def _category_name(data: dict[str, Any]) -> str | None:
             elif isinstance(category, str):
                 names.append(unescape(category))
         return ", ".join(names) or None
-    return _nested(data, "eventAttendanceMode") or _nested(data, "category")
+    return (
+        _nested(data, "eventcat")
+        or _nested(data, "eventsubcat")
+        or _nested(data, "eventAttendanceMode")
+        or _nested(data, "category")
+    )
 
 
 def _nested(data: dict[str, Any], *path: str) -> str | None:

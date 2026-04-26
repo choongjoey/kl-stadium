@@ -5,9 +5,14 @@ from kl_stadium_calendar.models import FetchResult, SourceConfig, SourceMethod
 class FakeFetcher:
     def __init__(self, responses):
         self.responses = responses
+        self.posted = []
 
     def get(self, url):
         return self.responses[url]
+
+    def post_json(self, url, payload):
+        self.posted.append((url, payload))
+        return self.responses[(url, payload["data"]["currentpage"])]
 
 
 def result(url, text, content_type="text/html"):
@@ -56,3 +61,40 @@ def test_uses_json_ld_before_html_fallback():
 
     assert discovered.method == SourceMethod.JSON_LD
 
+
+def test_discovers_paginated_post_json_source():
+    first = """
+    {
+      "data": [
+        {"row": {"titlename": "First", "datefrom": "2026-06-06T20:00:00"}}
+      ]
+    }
+    """
+    second = """
+    {
+      "data": [
+        {"row": {"titlename": "Second", "datefrom": "2026-06-07T20:00:00"}}
+      ]
+    }
+    """
+    fetcher = FakeFetcher(
+        {
+            ("https://example.test/api", 1): result("https://example.test/api", first, "application/json"),
+            ("https://example.test/api", 2): result(
+                "https://example.test/api", second, "application/json"
+            ),
+        }
+    )
+    source = SourceConfig(
+        "example",
+        "Example",
+        "https://example.test/api",
+        request_json={"method": "eventlisting", "data": {"currentpage": 1}},
+        request_pages=2,
+    )
+
+    discovered = discover_source(source, fetcher)
+
+    assert discovered.method == SourceMethod.API_JSON
+    assert "First" in discovered.fetched.text
+    assert "Second" in discovered.fetched.text

@@ -21,11 +21,11 @@ Tracked venues:
 
 Current generated status:
 
-- 14 normalized upcoming events
-- 23 configured sources, including manual seeds
+- 16 normalized upcoming events
+- 30 configured sources, including manual seeds
 - 0 failed sources in the latest local run
 
-Working live sources now include Live Nation, Star Planet, Hello Universe, KL Events Calendar, Songkick, Concert Archives, Concerts50, and EverythingBoleh. Blocked or unsuitable sources stay disabled or documented instead of using workarounds.
+Working live sources now include Live Nation, Star Planet, Hello Universe, KL Events Calendar, Songkick, Concert Archives, Concerts50, EverythingBoleh, Expolah, and generic Ticket2U concert/sports listings. Blocked or unsuitable sources stay disabled or documented instead of using workarounds.
 
 ## Calendar Subscription
 
@@ -96,6 +96,8 @@ Each source supports:
 - `venue_aliases`: optional venue names that should be accepted for that source
 - `enabled`: optional boolean; set `false` for blocked or unsuitable public sources
 - `note`: optional explanation for skipped sources
+- `request_json`: optional POST JSON payload for public JSON endpoints
+- `request_pages`: optional page count for paginated POST JSON sources
 
 `data/manual_events.json` contains high-confidence seed events from official or near-official pages. Keep this file small and source-backed; it exists because several Malaysian event sites do not expose reliable feeds or JSON-LD.
 
