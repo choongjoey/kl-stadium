@@ -35,6 +35,21 @@ def test_filters_past_and_accepts_venue_alias():
     assert events[0].venue == "Bukit Jalil National Stadium"
 
 
+def test_keeps_specific_bukit_jalil_venue():
+    sources = {"official": SourceConfig("official", "Official", "https://example.test", priority=10)}
+    item = raw("ONE OK ROCK")
+    item.venue = "Axiata Arena"
+
+    events = normalize_events(
+        [item],
+        sources,
+        now=datetime(2026, 1, 1, tzinfo=ZoneInfo("Asia/Kuala_Lumpur")),
+    )
+
+    assert len(events) == 1
+    assert events[0].venue == "Axiata Arena"
+
+
 def test_dedupes_same_event_same_date():
     sources = {
         "official": SourceConfig("official", "Official", "https://example.test", priority=10),

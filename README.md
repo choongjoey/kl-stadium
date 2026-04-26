@@ -1,6 +1,6 @@
 # Bukit Jalil Stadium Calendar
 
-Aggregates upcoming events for Bukit Jalil National Stadium / TM Stadium Nasional and publishes static calendar files.
+Aggregates upcoming events for the Bukit Jalil venue cluster and publishes static calendar files.
 
 The project intentionally has no website UI. The public contract is:
 
@@ -10,6 +10,12 @@ The project intentionally has no website UI. The public contract is:
 - `public/health.json` - run health summary
 
 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the pipeline design and [docs/SOURCES.md](docs/SOURCES.md) for source maintenance notes.
+
+Tracked venues:
+
+- Bukit Jalil National Stadium / TM Stadium Nasional
+- Axiata Arena / Unifi Arena
+- National Hockey Stadium
 
 ## Calendar Subscription
 

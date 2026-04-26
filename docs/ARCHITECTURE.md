@@ -11,7 +11,7 @@ This project turns public event data into static calendar files. It does not hos
 5. Discover the simplest usable format: iCal, RSS, Atom, API JSON, JSON-LD, then HTML fallback.
 6. Extract raw events.
 7. Normalize venue aliases, timezone, dates, categories, URLs, and source metadata.
-8. Drop historical events and events outside Bukit Jalil National Stadium.
+8. Drop historical events and events outside the tracked Bukit Jalil venue cluster.
 9. Deduplicate same-date, same-venue title variants.
 10. Write static files to `public/`.
 
@@ -44,7 +44,7 @@ The normalized event fields are:
 - `title`: event name.
 - `start`: Malaysia-local event start.
 - `end`: optional event end.
-- `venue`: normalized to `Bukit Jalil National Stadium`.
+- `venue`: normalized to one of the tracked Bukit Jalil venues.
 - `address`: venue address when known.
 - `url`: best source URL.
 - `category`: broad category such as `Concert` or `Sports`.
@@ -52,6 +52,12 @@ The normalized event fields are:
 - `status`: normally `CONFIRMED`.
 - `confidence`: derived from source priority.
 - `sources`: source IDs, names, URLs, and extraction methods.
+
+Tracked venues:
+
+- Bukit Jalil National Stadium / TM Stadium Nasional
+- Axiata Arena / Unifi Arena
+- National Hockey Stadium
 
 ## Outputs
 

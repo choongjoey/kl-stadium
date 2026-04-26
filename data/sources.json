@@ -20,9 +20,16 @@
     "priority": 10
   },
   {
+    "id": "live-nation-axiata-arena",
+    "name": "Live Nation Axiata Arena",
+    "url": "https://www.livenation.my/axiata-arena-tickets-vdp1009607",
+    "priority": 10,
+    "venue_aliases": ["Axiata Arena", "Unifi Arena", "Putra Indoor Stadium", "Putra Stadium", "Stadium Putra"]
+  },
+  {
     "id": "ticketmelon-search",
     "name": "Ticketmelon Bukit Jalil Search",
-    "url": "https://www.ticketmelon.com/search?q=Bukit%20Jalil%20National%20Stadium",
+    "url": "https://www.ticketmelon.com/search?q=Bukit%20Jalil",
     "priority": 25
   },
   {

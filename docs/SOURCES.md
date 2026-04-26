@@ -48,6 +48,14 @@ Use `https://www.livenation.my/event/allevents`.
 
 Reason: `/show` returns 404. The current public all-events route is linked from the Live Nation homepage. It does not currently expose simple JSON-LD for every event, so it may report zero raw events until a dedicated parser is added.
 
+### Live Nation Axiata Arena
+
+Status: enabled.
+
+Use `https://www.livenation.my/axiata-arena-tickets-vdp1009607`.
+
+Reason: Axiata Arena is part of the Bukit Jalil venue cluster and has its own Live Nation venue listing. The source is venue-restricted to Axiata Arena aliases.
+
 ### Eventbrite
 
 Status: enabled.

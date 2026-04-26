@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 import json
+import re
 from html import unescape
 from datetime import datetime
 from email.utils import parsedate_to_datetime
 from typing import Any
+from urllib.parse import urljoin
 from xml.etree import ElementTree
 
 from bs4 import BeautifulSoup
@@ -102,6 +104,11 @@ def _extract_json_ld(discovered: DiscoveredSource) -> list[RawEvent]:
 
 
 def _extract_html(discovered: DiscoveredSource) -> list[RawEvent]:
+    if "livenation.my" in discovered.url and "tickets-vdp" in discovered.url:
+        events = _extract_livenation_venue_page(discovered)
+        if events:
+            return events
+
     json_ld_source = DiscoveredSource(
         discovered.config,
         SourceMethod.JSON_LD,
@@ -113,6 +120,99 @@ def _extract_html(discovered: DiscoveredSource) -> list[RawEvent]:
     for event in events:
         event.method = SourceMethod.HTML
     return events
+
+
+def _extract_livenation_venue_page(discovered: DiscoveredSource) -> list[RawEvent]:
+    soup = BeautifulSoup(discovered.fetched.text, "html.parser")
+    text_lines = [line.strip() for line in soup.get_text("\n").splitlines() if line.strip()]
+    event_links = [
+        urljoin(discovered.url, link.get("href"))
+        for link in soup.find_all("a", href=True)
+        if str(link.get("href")).startswith("/event/")
+        and str(link.get("href")) not in {"/event/allevents"}
+    ]
+
+    events: list[RawEvent] = []
+    link_index = 0
+    for index, line in enumerate(text_lines):
+        if line != "Find Tickets" or index == 0:
+            continue
+        title = _previous_livenation_title(text_lines, index)
+        if not title:
+            continue
+        date_value = _next_matching_line(text_lines, index + 1, r"\d{1,2}\s+\w+\s+\d{4}")
+        if not date_value:
+            continue
+        time_value = _next_livenation_time_line(text_lines, index + 1)
+        event = _base_event(discovered, title)
+        event.start = _parse_first_date(_join_date_time(_strip_weekday(date_value), time_value))
+        event.venue = discovered.config.venue_aliases[0] if discovered.config.venue_aliases else "Axiata Arena"
+        event.address = "217, Bukit Jalil, 57000 Kuala Lumpur, Malaysia"
+        event.url = event_links[link_index] if link_index < len(event_links) else discovered.url
+        event.category = "Concert"
+        event.description = f"{title} at {event.venue}"
+        events.append(event)
+        link_index += 1
+    return events
+
+
+def _next_matching_line(lines: list[str], start: int, pattern: str) -> str | None:
+    regex = re.compile(pattern)
+    for line in lines[start : start + 5]:
+        if regex.search(line):
+            return line
+    return None
+
+
+def _previous_livenation_title(lines: list[str], ticket_index: int) -> str | None:
+    ignored = {
+        "Find Tickets",
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+        "Sunday",
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec",
+    }
+    for line in reversed(lines[max(0, ticket_index - 8) : ticket_index]):
+        if line in ignored or re.fullmatch(r"\d{1,4}", line):
+            continue
+        return line
+    return None
+
+
+def _next_livenation_time_line(lines: list[str], start: int) -> str | None:
+    for offset, line in enumerate(lines[start : start + 12]):
+        if line != "Time:":
+            continue
+        if start + offset + 1 < len(lines):
+            candidate = lines[start + offset + 1]
+            if re.fullmatch(r"\d{1,2}(:\d{2})?\s*(am|pm|AM|PM)", candidate):
+                return candidate
+    return None
+
+
+def _join_date_time(date_value: str, time_value: str | None) -> str:
+    if not time_value:
+        return date_value
+    return f"{date_value} {time_value}"
+
+
+def _strip_weekday(value: str) -> str:
+    return re.sub(r"\s*\([^)]*\)\s*$", "", value).strip()
 
 
 def _event_candidates(payload: Any) -> list[dict[str, Any]]:

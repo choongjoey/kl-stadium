@@ -5,7 +5,7 @@ import re
 from datetime import UTC, datetime
 from zoneinfo import ZoneInfo
 
-from .config import DEFAULT_VENUE_ALIASES
+from .config import DEFAULT_VENUE_ALIASES, VENUE_ALIAS_GROUPS
 from .models import Event, RawEvent, SourceConfig
 
 MALAYSIA_TZ = ZoneInfo("Asia/Kuala_Lumpur")
@@ -65,13 +65,18 @@ def _localize(value: datetime) -> datetime:
 
 
 def _resolve_venue(venue: str | None, source_aliases: tuple[str, ...]) -> str | None:
-    aliases = source_aliases or DEFAULT_VENUE_ALIASES
     if not venue:
-        return "Bukit Jalil National Stadium"
+        return None
+    aliases = source_aliases or DEFAULT_VENUE_ALIASES
+    allowed_aliases = {_norm(alias) for alias in aliases}
     normalized_venue = _norm(venue)
-    for alias in aliases:
-        if _norm(alias) in normalized_venue or normalized_venue in _norm(alias):
-            return "Bukit Jalil National Stadium"
+    for canonical, canonical_aliases in VENUE_ALIAS_GROUPS.items():
+        for alias in canonical_aliases:
+            normalized_alias = _norm(alias)
+            if normalized_alias not in allowed_aliases:
+                continue
+            if normalized_alias in normalized_venue or normalized_venue in normalized_alias:
+                return canonical
     return None
 
 

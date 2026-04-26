@@ -5,13 +5,32 @@ from pathlib import Path
 
 from .models import SourceConfig, SourceMethod
 
-DEFAULT_VENUE_ALIASES = (
-    "Bukit Jalil National Stadium",
-    "National Stadium Bukit Jalil",
-    "Stadium Nasional Bukit Jalil",
-    "TM National Stadium",
-    "TM Stadium Nasional",
-    "Stadium Nasional",
+VENUE_ALIAS_GROUPS: dict[str, tuple[str, ...]] = {
+    "Bukit Jalil National Stadium": (
+        "Bukit Jalil National Stadium",
+        "National Stadium Bukit Jalil",
+        "Stadium Nasional Bukit Jalil",
+        "TM National Stadium",
+        "TM Stadium Nasional",
+        "Stadium Nasional",
+    ),
+    "Axiata Arena": (
+        "Axiata Arena",
+        "Unifi Arena",
+        "Putra Indoor Stadium",
+        "Putra Stadium",
+        "Stadium Putra",
+    ),
+    "National Hockey Stadium": (
+        "National Hockey Stadium",
+        "National Hockey Stadium Bukit Jalil",
+        "Stadium Hoki Nasional",
+        "Stadium Hoki Nasional Bukit Jalil",
+    ),
+}
+
+DEFAULT_VENUE_ALIASES = tuple(
+    alias for aliases in VENUE_ALIAS_GROUPS.values() for alias in aliases
 )
 
 
