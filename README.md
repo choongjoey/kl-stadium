@@ -17,6 +17,16 @@ Tracked venues:
 - Axiata Arena / Unifi Arena
 - National Hockey Stadium
 
+## Progress
+
+Current generated status:
+
+- 14 normalized upcoming events
+- 23 configured sources, including manual seeds
+- 0 failed sources in the latest local run
+
+Working live sources now include Live Nation, Star Planet, Hello Universe, KL Events Calendar, Songkick, Concert Archives, Concerts50, and EverythingBoleh. Blocked or unsuitable sources stay disabled or documented instead of using workarounds.
+
 ## Calendar Subscription
 
 Subscribe to the hosted `events.ics` URL. Do not download and import the file, because imports are one-time copies.
@@ -58,9 +68,17 @@ Run tests:
 rtk .venv/bin/pytest
 ```
 
+Run lint:
+
+```bash
+rtk .venv/bin/ruff check .
+```
+
 ## Deployment
 
 The included GitHub Actions workflow runs daily and publishes `public/` to GitHub Pages. Enable Pages in the repository with GitHub Actions as the source.
+
+If `https://choongjoey.github.io/kl-stadium/events.ics` returns a GitHub Pages 404 while the workflow succeeds, check the repository's Pages setting. The source must be `GitHub Actions`; `Deploy from a branch` serves the README/Jekyll site and will not expose the generated `public/` files.
 
 Cloudflare Pages can serve the same `public/` directory. The generated `_headers` file sets `events.ics` to `text/calendar` and adds cache headers. GitHub Pages ignores `_headers`, but still serves the static file at a stable URL.
 

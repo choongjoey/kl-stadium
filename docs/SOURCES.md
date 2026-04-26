@@ -16,6 +16,12 @@ Do not add source-specific parsing until these options fail.
 
 ## Current Sources
 
+Latest local run:
+
+- 14 normalized upcoming events.
+- 23 configured sources, including manual seeds.
+- 0 failed sources.
+
 ### Manual Seed Events
 
 Status: enabled.
