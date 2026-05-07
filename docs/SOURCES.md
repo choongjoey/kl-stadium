@@ -19,7 +19,7 @@ Do not add source-specific parsing until these options fail.
 Latest local run:
 
 - 16 normalized upcoming events.
-- 30 configured sources, including manual seeds.
+- 31 configured sources, including manual seeds.
 - 0 failed sources.
 
 ### Manual Seed Events
@@ -109,6 +109,14 @@ Status: enabled.
 Use `https://everythingboleh.com/event/exo-concert-2026/`.
 
 Reason: the public event detail page exposes event JSON-LD with date, time, venue, and address. It is low priority and restricted to JSON-LD because its iCal alternate currently returns 403 to ordinary public HTTP clients.
+
+### iLasso Tickets
+
+Status: enabled.
+
+Use `https://www.ilassotickets.com/Default`.
+
+Reason: the public default listing page is server-rendered HTML with event cards containing title, venue, and date. It is restricted to HTML because the page exposes no ICS, RSS, Atom, or JSON-LD feeds. Venue-alias filtering keeps only events at tracked venues.
 
 ### Hello Universe
 
