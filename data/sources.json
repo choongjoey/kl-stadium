@@ -86,6 +86,13 @@
     "note": "Public Ticket2U eventlisting endpoint for sports listings. Venue filtering keeps only the Bukit Jalil cluster."
   },
   {
+    "id": "ilasso-events",
+    "name": "iLasso Tickets Events",
+    "url": "https://www.ilassotickets.com/Default",
+    "priority": 22,
+    "allowed_methods": ["html"]
+  },
+  {
     "id": "starplanet-gem-2026",
     "name": "Star Planet G.E.M. 2026",
     "url": "https://starplanet.com.my/show/gemkl2026/",

@@ -9,7 +9,7 @@ from typing import Any
 from urllib.parse import urljoin
 from xml.etree import ElementTree
 
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, Tag
 from dateutil.parser import parse as parse_datetime
 from icalendar import Calendar
 
@@ -125,6 +125,11 @@ def _extract_html(discovered: DiscoveredSource) -> list[RawEvent]:
 
     if "hellouniverse.asia" in discovered.url:
         events = _extract_hello_universe_home(discovered)
+        if events:
+            return events
+
+    if "ilassotickets.com" in discovered.url:
+        events = _extract_ilasso_default(discovered)
         if events:
             return events
 
@@ -328,6 +333,33 @@ def _extract_concert_archives_venue(discovered: DiscoveredSource) -> list[RawEve
         event.url = urljoin(discovered.url, link["href"]) if link else discovered.url
         event.category = "Concert"
         event.description = f"{title} at {venue}"
+        events.append(event)
+    return events
+
+
+def _extract_ilasso_default(discovered: DiscoveredSource) -> list[RawEvent]:
+    soup = BeautifulSoup(discovered.fetched.text, "html.parser")
+    events: list[RawEvent] = []
+    for heading in soup.find_all("h5"):
+        link = heading.find("a", href=True)
+        title = _clean(heading.get_text(" ", strip=True))
+        if not title or not link:
+            continue
+        event_url = urljoin(discovered.url, link["href"])
+        siblings = []
+        for sibling in heading.next_siblings:
+            text = sibling.get_text(" ", strip=True) if isinstance(sibling, Tag) else str(sibling).strip()
+            if text:
+                siblings.append(text)
+            if len(siblings) >= 3:
+                break
+        venue = siblings[0] if siblings else None
+        date_str = next((s for s in siblings[1:] if re.search(r"\d", s)), None)
+        event = _base_event(discovered, title)
+        event.start = _parse_first_date(date_str)
+        event.venue = venue
+        event.url = event_url
+        event.category = "Concert"
         events.append(event)
     return events
 
