@@ -14,9 +14,9 @@ VENUE_ALIAS_GROUPS: dict[str, tuple[str, ...]] = {
         "TM Stadium Nasional",
         "Stadium Nasional",
     ),
-    "Axiata Arena": (
-        "Axiata Arena",
+    "Unifi Arena": (
         "Unifi Arena",
+        "Axiata Arena",
         "Putra Indoor Stadium",
         "Putra Stadium",
         "Stadium Putra",

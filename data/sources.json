@@ -29,10 +29,10 @@
   },
   {
     "id": "live-nation-axiata-arena",
-    "name": "Live Nation Axiata Arena",
+    "name": "Live Nation Unifi Arena",
     "url": "https://www.livenation.my/axiata-arena-tickets-vdp1009607",
     "priority": 10,
-    "venue_aliases": ["Axiata Arena", "Unifi Arena", "Putra Indoor Stadium", "Putra Stadium", "Stadium Putra"]
+    "venue_aliases": ["Unifi Arena", "Axiata Arena", "Putra Indoor Stadium", "Putra Stadium", "Stadium Putra"]
   },
   {
     "id": "live-nation-lany-2026",
@@ -149,10 +149,10 @@
   },
   {
     "id": "songkick-axiata-arena",
-    "name": "Songkick Axiata Arena Venue",
+    "name": "Songkick Unifi Arena Venue",
     "url": "https://tickets.songkick.com/venues/3632319-axiata-arena",
     "priority": 72,
-    "venue_aliases": ["Axiata Arena", "Unifi Arena", "Putra Indoor Stadium", "Putra Stadium", "Stadium Putra"],
+    "venue_aliases": ["Unifi Arena", "Axiata Arena", "Putra Indoor Stadium", "Putra Stadium", "Stadium Putra"],
     "note": "Public venue page currently redirects to Songkick's Unifi Arena name for the same arena."
   },
   {
@@ -164,20 +164,20 @@
   },
   {
     "id": "concert-archives-axiata",
-    "name": "Concert Archives Axiata Arena",
+    "name": "Concert Archives Unifi Arena",
     "url": "https://www.concertarchives.org/venues/axiata-arena--930485",
     "priority": 85,
     "allowed_methods": ["html"],
-    "venue_aliases": ["Axiata Arena", "Unifi Arena", "Putra Indoor Stadium", "Putra Stadium", "Stadium Putra"],
+    "venue_aliases": ["Unifi Arena", "Axiata Arena", "Putra Indoor Stadium", "Putra Stadium", "Stadium Putra"],
     "note": "Public fan-maintained venue table; use as low-priority corroboration only."
   },
   {
     "id": "concerts50-axiata",
-    "name": "Concerts50 Axiata Arena",
+    "name": "Concerts50 Unifi Arena",
     "url": "https://concerts50.com/venues/malaysia/kuala-lumpur/axiata-arena",
     "priority": 88,
     "allowed_methods": ["json_ld"],
-    "venue_aliases": ["Axiata Arena", "Unifi Arena", "Putra Indoor Stadium", "Putra Stadium", "Stadium Putra"],
+    "venue_aliases": ["Unifi Arena", "Axiata Arena", "Putra Indoor Stadium", "Putra Stadium", "Stadium Putra"],
     "note": "Public aggregator with JSON-LD; use as low-priority corroboration only."
   },
   {

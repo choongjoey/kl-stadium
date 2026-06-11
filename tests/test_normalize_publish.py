@@ -1,3 +1,4 @@
+import hashlib
 from datetime import date, datetime
 from zoneinfo import ZoneInfo
 
@@ -47,7 +48,24 @@ def test_keeps_specific_bukit_jalil_venue():
     )
 
     assert len(events) == 1
-    assert events[0].venue == "Axiata Arena"
+    assert events[0].venue == "Unifi Arena"
+
+
+def test_preserves_stable_id_across_arena_rename():
+    sources = {"official": SourceConfig("official", "Official", "https://example.test", priority=10)}
+    item = raw("ONE OK ROCK")
+    item.venue = "Axiata Arena"
+
+    events = normalize_events(
+        [item],
+        sources,
+        now=datetime(2026, 1, 1, tzinfo=ZoneInfo("Asia/Kuala_Lumpur")),
+    )
+
+    old_key = "2026-09-27|axiata arena|one ok rock"
+    old_digest = hashlib.sha1(old_key.encode("utf-8")).hexdigest()[:16]
+    assert events[0].venue == "Unifi Arena"
+    assert events[0].id == f"{old_digest}@kl-stadium-calendar"
 
 
 def test_dedupes_same_event_same_date():
@@ -138,6 +156,7 @@ def test_dedupes_stylized_artist_name_listing():
     assert len(events) == 1
     assert len(events[0].sources) == 2
     assert events[0].end == datetime(2026, 5, 16, 23, 0, tzinfo=MALAYSIA_TZ)
+    assert events[0].venue == "Unifi Arena"
 
 
 def test_keeps_distinct_overlapping_events():
@@ -163,6 +182,55 @@ def test_keeps_distinct_overlapping_events():
     )
 
     assert len(events) == 2
+
+
+def test_drops_known_non_stadium_ticket2u_event():
+    sources = {"ticket2u": SourceConfig("ticket2u", "Ticket2U", "https://example.test", priority=18)}
+    item = raw("LGRA x MITOGELS Sub 2.30 Half Marathon Training Running Class", "ticket2u")
+    item.venue = "Bukit Jalil"
+    item.url = (
+        "https://www.ticket2u.com.my/event/50519/"
+        "lgra-x-mitogels-sub-2.30-half-marathon-training-running-class"
+    )
+
+    events = normalize_events(
+        [item],
+        sources,
+        now=datetime(2026, 1, 1, tzinfo=ZoneInfo("Asia/Kuala_Lumpur")),
+    )
+
+    assert events == []
+
+
+def test_merged_renamed_arena_event_uses_canonical_location(tmp_path):
+    sources = {
+        "ticket2u": SourceConfig("ticket2u", "Ticket2U", "https://example.test", priority=18),
+        "concerts50": SourceConfig("concerts50", "Concerts50", "https://example.test", priority=88),
+    }
+    ticket2u = raw("DATO M.N47IR CIPTA 4", "ticket2u")
+    ticket2u.venue = "Axiata Arena"
+    ticket2u.start = datetime(2026, 7, 4, 20, 30, tzinfo=MALAYSIA_TZ)
+    ticket2u.end = datetime(2026, 7, 4, 23, 0, tzinfo=MALAYSIA_TZ)
+    concerts50 = raw("M. Nasir", "concerts50")
+    concerts50.venue = "Axiata Arena"
+    concerts50.start = datetime(2026, 7, 4, 20, 30, tzinfo=MALAYSIA_TZ)
+
+    events = dedupe_events(
+        normalize_events(
+            [ticket2u, concerts50],
+            sources,
+            now=datetime(2026, 1, 1, tzinfo=ZoneInfo("Asia/Kuala_Lumpur")),
+        )
+    )
+
+    write_outputs(tmp_path, events, [{"id": "ticket2u", "status": "ok"}])
+
+    calendar = Calendar.from_ical((tmp_path / "events.ics").read_bytes())
+    vevent = next(component for component in calendar.walk() if component.name == "VEVENT")
+    assert len(events) == 1
+    assert events[0].venue == "Unifi Arena"
+    assert events[0].address is None
+    assert str(vevent.get("location")) == "Unifi Arena"
 
 
 def test_writes_valid_calendar(tmp_path):

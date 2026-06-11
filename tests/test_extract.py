@@ -68,6 +68,42 @@ def test_extracts_json_ld_ignores_site_metadata():
     assert events[0].title == "EXO PLANET #6"
 
 
+def test_ignores_concerts50_venue_page_address():
+    html = """
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "MusicEvent",
+      "name": "M. Nasir",
+      "startDate": "2026-07-04T20:30:00+08:00",
+      "location": {
+        "@type": "Place",
+        "name": "Axiata Arena",
+        "address": {
+          "streetAddress": "L2-E-10, Enterprise 4, Technology Park Malaysia, Lebuhraya Bukit Jalil, Bukit Jalil",
+          "addressLocality": "Kuala Lumpur",
+          "postalCode": "57000",
+          "addressCountry": "MY"
+        }
+      },
+      "url": "https://concerts50.com/events/m-nasir"
+    }
+    </script>
+    """
+
+    events = extract_events(
+        discovered(
+            SourceMethod.JSON_LD,
+            html,
+            url="https://concerts50.com/venues/malaysia/kuala-lumpur/axiata-arena",
+        )
+    )
+
+    assert len(events) == 1
+    assert events[0].venue == "Axiata Arena"
+    assert events[0].address is None
+
+
 def test_extracts_ics_event():
     ics = """BEGIN:VCALENDAR
 VERSION:2.0
@@ -184,7 +220,7 @@ def test_extracts_live_nation_venue_page_events():
 
     assert len(events) == 2
     assert events[0].title == "ONE OK ROCK DETOX Asia Tour 2026 in Kuala Lumpur"
-    assert events[0].venue == "Axiata Arena"
+    assert events[0].venue == "Unifi Arena"
     assert events[0].url.endswith("tickets-edp1624599")
     assert events[1].start.hour == 20
 

@@ -10,6 +10,14 @@ from .models import Event, RawEvent, SourceConfig
 
 MALAYSIA_TZ = ZoneInfo("Asia/Kuala_Lumpur")
 
+EXCLUDED_EVENT_URL_PARTS = (
+    "/event/50519/lgra-x-mitogels-sub-2.30-half-marathon-training-running-class",
+)
+
+STABLE_ID_VENUE_NAMES = {
+    "Unifi Arena": "Axiata Arena",
+}
+
 
 def normalize_events(
     raw_events: list[RawEvent],
@@ -19,6 +27,8 @@ def normalize_events(
     cutoff = now or datetime.now(MALAYSIA_TZ)
     normalized: list[Event] = []
     for raw in raw_events:
+        if _excluded_event(raw):
+            continue
         if raw.start is None:
             continue
         start = _localize(raw.start)
@@ -31,7 +41,7 @@ def normalize_events(
         venue = _resolve_venue(raw.venue, source.venue_aliases)
         if venue is None:
             continue
-        event_id = _stable_id(raw.title, start, venue)
+        event_id = _stable_id(raw.title, start, _stable_id_venue(venue))
         normalized.append(
             Event(
                 id=event_id,
@@ -64,6 +74,16 @@ def _localize(value: datetime) -> datetime:
     return value.astimezone(MALAYSIA_TZ)
 
 
+def _excluded_event(raw: RawEvent) -> bool:
+    urls = (raw.url, raw.source_url)
+    return any(
+        blocked in url
+        for url in urls
+        if url
+        for blocked in EXCLUDED_EVENT_URL_PARTS
+    )
+
+
 def _resolve_venue(venue: str | None, source_aliases: tuple[str, ...]) -> str | None:
     if not venue:
         return None
@@ -88,6 +108,10 @@ def _stable_id(title: str, start: datetime, venue: str) -> str:
     key = f"{start.date().isoformat()}|{_norm(venue)}|{_title_fingerprint(title)}"
     digest = hashlib.sha1(key.encode("utf-8")).hexdigest()[:16]
     return f"{digest}@kl-stadium-calendar"
+
+
+def _stable_id_venue(venue: str) -> str:
+    return STABLE_ID_VENUE_NAMES.get(venue, venue)
 
 
 def _title_fingerprint(title: str) -> str:

@@ -46,7 +46,7 @@ Reason: the old configured venue ID redirected to an unrelated venue. Search res
 
 Note: Songkick's formal API requires approved access. The project currently reads only the public venue page and treats Songkick as a corroborating source.
 
-`songkick-axiata-arena` reads the public Axiata/Unifi Arena venue page and contributes corroborating concert rows through embedded JSON-LD. `songkick-national-hockey-exo-2026` reads the public EXO event page as a National Hockey Stadium corroborating source.
+`songkick-axiata-arena` reads the public Unifi/Axiata Arena venue page and contributes corroborating concert rows through embedded JSON-LD. `songkick-national-hockey-exo-2026` reads the public EXO event page as a National Hockey Stadium corroborating source.
 
 ### Concert Archives
 
@@ -54,7 +54,7 @@ Status: enabled.
 
 Use `https://www.concertarchives.org/venues/axiata-arena--930485`.
 
-Reason: the public venue table is readable through ordinary HTTP and provides date, title, venue, and location rows for Axiata Arena. It is fan-maintained, so it stays low priority and is used only as corroboration or as a hint for events missing from official feeds.
+Reason: the public venue table is readable through ordinary HTTP and provides date, title, venue, and location rows for Unifi Arena / Axiata Arena. It is fan-maintained, so it stays low priority and is used only as corroboration or as a hint for events missing from official feeds.
 
 ### Concerts50
 
@@ -62,7 +62,7 @@ Status: enabled.
 
 Use `https://concerts50.com/venues/malaysia/kuala-lumpur/axiata-arena`.
 
-Reason: the public venue page exposes event JSON-LD for Axiata Arena, including several events not yet visible on higher-priority official pages. It is restricted to JSON-LD because the page links unrelated JSON alternates such as the web app manifest.
+Reason: the public venue page exposes event JSON-LD for Unifi Arena / Axiata Arena, including several events not yet visible on higher-priority official pages. It is restricted to JSON-LD because the page links unrelated JSON alternates such as the web app manifest.
 
 ### Expolah
 
@@ -82,13 +82,13 @@ Reason: `/show` returns 404. The current public all-events route is linked from 
 
 `live-nation-post-malone-2026` is a targeted public HTML scrape of the official event detail page. It is restricted to HTML because the page's JSON-LD is not the event payload used by the extractor.
 
-### Live Nation Axiata Arena
+### Live Nation Unifi Arena
 
 Status: enabled.
 
 Use `https://www.livenation.my/axiata-arena-tickets-vdp1009607`.
 
-Reason: Axiata Arena is part of the Bukit Jalil venue cluster and has its own Live Nation venue listing. The source is venue-restricted to Axiata Arena aliases.
+Reason: Unifi Arena, formerly listed by many sources as Axiata Arena, is part of the Bukit Jalil venue cluster and has its own Live Nation venue listing. The source is venue-restricted to Unifi/Axiata Arena aliases.
 
 `live-nation-lany-2026` is a targeted official event detail page for LANY at Unifi Arena. It is restricted to HTML for the same reason as other Live Nation detail pages.
 
@@ -152,7 +152,9 @@ Status: generic legacy search skipped; public eventlisting API enabled.
 
 `ticket2u-concerts` and `ticket2u-sports` use `https://www.ticket2u.com.my/api/api2.ashx` with the public `eventlisting` POST payload used by Ticket2U's own `/event/list` page. The source fetches paginated concert and sports listings, then the normal venue filter keeps only Bukit Jalil cluster events.
 
-Reason: this is generic enough to discover Ticket2U-listed Axiata Arena, Unifi Arena, National Hockey Stadium, and Bukit Jalil stadium events without adding a source per artist. It also covers Malay, Indonesian, Indian, Chinese, K-pop, and sports listings when Ticket2U carries them.
+Reason: this is generic enough to discover Ticket2U-listed Unifi Arena, Axiata Arena, National Hockey Stadium, and Bukit Jalil stadium events without adding a source per artist. It also covers Malay, Indonesian, Indian, Chinese, K-pop, and sports listings when Ticket2U carries them.
+
+Known non-stadium false positives are excluded by exact event URL in normalization, such as the LGRA x MITOGELS half-marathon training class.
 
 The old `/events?...` search URL still returns a 404 shell, and the homepage can return Cloudflare 403 to normal public HTTP clients. Do not bypass this. Use the public eventlisting endpoint or search-indexed public event detail pages only.
 

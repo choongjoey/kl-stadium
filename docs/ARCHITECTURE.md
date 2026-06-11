@@ -56,7 +56,7 @@ The normalized event fields are:
 Tracked venues:
 
 - Bukit Jalil National Stadium / TM Stadium Nasional
-- Axiata Arena / Unifi Arena
+- Unifi Arena / Axiata Arena
 - National Hockey Stadium
 
 ## Outputs

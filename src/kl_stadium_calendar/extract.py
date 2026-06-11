@@ -216,7 +216,7 @@ def _extract_livenation_venue_page(discovered: DiscoveredSource) -> list[RawEven
         event.venue = (
             discovered.config.venue_aliases[0]
             if discovered.config.venue_aliases
-            else "Axiata Arena"
+            else "Unifi Arena"
         )
         event.address = "217, Bukit Jalil, 57000 Kuala Lumpur, Malaysia"
         event.url = event_links[link_index] if link_index < len(event_links) else discovered.url
@@ -615,7 +615,7 @@ def _event_from_mapping(discovered: DiscoveredSource, data: dict[str, Any]) -> R
     event.category = _category_name(data)
     event.description = _nested(data, "description") or _nested(data, "summary") or _nested(data, "excerpt")
     event.venue = _location_name(data)
-    event.address = _location_address(data)
+    event.address = None if _ignore_location_address(discovered) else _location_address(data)
     event.raw = data
     return event
 
@@ -673,6 +673,10 @@ def _location_address(data: dict[str, Any]) -> str | None:
     ]
     return ", ".join(str(part) for part in parts if part) or None
     return None
+
+
+def _ignore_location_address(discovered: DiscoveredSource) -> bool:
+    return "concerts50.com/venues/" in discovered.url
 
 
 def _category_name(data: dict[str, Any]) -> str | None:

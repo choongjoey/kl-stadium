@@ -14,7 +14,7 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the pipeline design and [do
 Tracked venues:
 
 - Bukit Jalil National Stadium / TM Stadium Nasional
-- Axiata Arena / Unifi Arena
+- Unifi Arena / Axiata Arena
 - National Hockey Stadium
 
 ## Progress
