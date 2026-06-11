@@ -72,6 +72,7 @@ def _tokens(value: str) -> set[str]:
         "axiata",
         "bukit",
         "concert",
+        "dato",
         "hockey",
         "in",
         "jalil",
@@ -86,10 +87,19 @@ def _tokens(value: str) -> set[str]:
         "world",
     }
     return {
-        token
+        canonical
         for token in re.findall(r"[a-z0-9]+", value.lower())
-        if token not in stopwords and not re.fullmatch(r"20\d{2}", token)
+        if (canonical := _canonical_token(token)) not in stopwords
+        and not re.fullmatch(r"20\d{2}", canonical)
     }
+
+
+def _canonical_token(token: str) -> str:
+    if any(character.isdigit() for character in token) and any(
+        character.isalpha() for character in token
+    ):
+        return token.translate(str.maketrans({"0": "o", "1": "i", "3": "e", "4": "a", "7": "s"}))
+    return token
 
 
 def _norm(value: str) -> str:

@@ -114,6 +114,57 @@ def test_dedupes_generic_event_listing_title():
     assert len(events[0].sources) == 2
 
 
+def test_dedupes_stylized_artist_name_listing():
+    sources = {
+        "official": SourceConfig("official", "Official", "https://example.test", priority=10),
+        "aggregator": SourceConfig("aggregator", "Aggregator", "https://example.test", priority=80),
+    }
+    event_a = raw("DATO M.N47IR CIPTA 4", "official")
+    event_a.venue = "Axiata Arena"
+    event_a.start = datetime(2026, 5, 16, 20, 30, tzinfo=MALAYSIA_TZ)
+    event_a.end = datetime(2026, 5, 16, 23, 0, tzinfo=MALAYSIA_TZ)
+    event_b = raw("M. Nasir", "aggregator")
+    event_b.venue = "Axiata Arena"
+    event_b.start = datetime(2026, 5, 16, 20, 30, tzinfo=MALAYSIA_TZ)
+
+    events = dedupe_events(
+        normalize_events(
+            [event_a, event_b],
+            sources,
+            now=datetime(2026, 1, 1, tzinfo=ZoneInfo("Asia/Kuala_Lumpur")),
+        )
+    )
+
+    assert len(events) == 1
+    assert len(events[0].sources) == 2
+    assert events[0].end == datetime(2026, 5, 16, 23, 0, tzinfo=MALAYSIA_TZ)
+
+
+def test_keeps_distinct_overlapping_events():
+    sources = {
+        "official": SourceConfig("official", "Official", "https://example.test", priority=10),
+        "aggregator": SourceConfig("aggregator", "Aggregator", "https://example.test", priority=80),
+    }
+    event_a = raw("Post Malone", "official")
+    event_a.venue = "Axiata Arena"
+    event_a.start = datetime(2026, 9, 27, 20, 0, tzinfo=MALAYSIA_TZ)
+    event_a.end = datetime(2026, 9, 27, 22, 30, tzinfo=MALAYSIA_TZ)
+    event_b = raw("Corporate Dinner", "aggregator")
+    event_b.venue = "Axiata Arena"
+    event_b.start = datetime(2026, 9, 27, 20, 30, tzinfo=MALAYSIA_TZ)
+    event_b.end = datetime(2026, 9, 27, 23, 0, tzinfo=MALAYSIA_TZ)
+
+    events = dedupe_events(
+        normalize_events(
+            [event_a, event_b],
+            sources,
+            now=datetime(2026, 1, 1, tzinfo=ZoneInfo("Asia/Kuala_Lumpur")),
+        )
+    )
+
+    assert len(events) == 2
+
+
 def test_writes_valid_calendar(tmp_path):
     sources = {"official": SourceConfig("official", "Official", "https://example.test", priority=10)}
     events = normalize_events(
