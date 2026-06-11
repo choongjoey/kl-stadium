@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date, datetime
 from zoneinfo import ZoneInfo
 
 from icalendar import Calendar
@@ -130,6 +130,69 @@ def test_writes_valid_calendar(tmp_path):
     assert str(vevents[0].get("summary")) == "Post Malone"
     assert str(calendar.get("x-published-ttl")) == "PT6H"
     assert b"REFRESH-INTERVAL;VALUE=DURATION:PT6H" in (tmp_path / "events.ics").read_bytes()
+
+
+def test_writes_multi_day_events_as_all_day(tmp_path):
+    sources = {"official": SourceConfig("official", "Official", "https://example.test", priority=10)}
+    item = raw("Malaysia Autoshow")
+    item.start = datetime(2026, 9, 27, 10, 0, tzinfo=MALAYSIA_TZ)
+    item.end = datetime(2026, 9, 29, 18, 0, tzinfo=MALAYSIA_TZ)
+    events = normalize_events(
+        [item],
+        sources,
+        now=datetime(2026, 1, 1, tzinfo=ZoneInfo("Asia/Kuala_Lumpur")),
+    )
+
+    write_outputs(tmp_path, events, [{"id": "official", "status": "ok"}])
+
+    ics = (tmp_path / "events.ics").read_bytes()
+    calendar = Calendar.from_ical(ics)
+    vevent = next(component for component in calendar.walk() if component.name == "VEVENT")
+    assert vevent.decoded("dtstart") == date(2026, 9, 27)
+    assert vevent.decoded("dtend") == date(2026, 9, 30)
+    assert b"DTSTART;VALUE=DATE:20260927" in ics
+    assert b"DTEND;VALUE=DATE:20260930" in ics
+
+
+def test_writes_midnight_ended_multi_day_events_with_exclusive_end_date(tmp_path):
+    sources = {"official": SourceConfig("official", "Official", "https://example.test", priority=10)}
+    item = raw("Tournament")
+    item.start = datetime(2026, 9, 27, 10, 0, tzinfo=MALAYSIA_TZ)
+    item.end = datetime(2026, 9, 29, 0, 0, tzinfo=MALAYSIA_TZ)
+    events = normalize_events(
+        [item],
+        sources,
+        now=datetime(2026, 1, 1, tzinfo=ZoneInfo("Asia/Kuala_Lumpur")),
+    )
+
+    write_outputs(tmp_path, events, [{"id": "official", "status": "ok"}])
+
+    calendar = Calendar.from_ical((tmp_path / "events.ics").read_bytes())
+    vevent = next(component for component in calendar.walk() if component.name == "VEVENT")
+    assert vevent.decoded("dtstart") == date(2026, 9, 27)
+    assert vevent.decoded("dtend") == date(2026, 9, 29)
+
+
+def test_preserves_timed_overnight_events(tmp_path):
+    sources = {"official": SourceConfig("official", "Official", "https://example.test", priority=10)}
+    item = raw("Late Night Concert")
+    item.start = datetime(2026, 9, 27, 20, 30, tzinfo=MALAYSIA_TZ)
+    item.end = datetime(2026, 9, 28, 1, 0, tzinfo=MALAYSIA_TZ)
+    events = normalize_events(
+        [item],
+        sources,
+        now=datetime(2026, 1, 1, tzinfo=ZoneInfo("Asia/Kuala_Lumpur")),
+    )
+
+    write_outputs(tmp_path, events, [{"id": "official", "status": "ok"}])
+
+    ics = (tmp_path / "events.ics").read_bytes()
+    calendar = Calendar.from_ical(ics)
+    vevent = next(component for component in calendar.walk() if component.name == "VEVENT")
+    assert vevent.decoded("dtstart") == datetime(2026, 9, 27, 20, 30, tzinfo=MALAYSIA_TZ)
+    assert vevent.decoded("dtend") == datetime(2026, 9, 28, 1, 0, tzinfo=MALAYSIA_TZ)
+    assert b"DTSTART;VALUE=DATE" not in ics
+    assert b"DTEND;VALUE=DATE" not in ics
 
 
 def test_writes_static_host_headers(tmp_path):

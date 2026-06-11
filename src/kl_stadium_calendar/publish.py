@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime, time, timedelta
 from pathlib import Path
 
 from icalendar import Calendar, Event as ICalEvent, vText
@@ -57,9 +57,7 @@ def _calendar(events: list[Event], run_at: datetime) -> Calendar:
         component = ICalEvent()
         component.add("uid", event.id)
         component.add("dtstamp", run_at)
-        component.add("dtstart", event.start)
-        if event.end:
-            component.add("dtend", event.end)
+        _add_event_dates(component, event)
         component.add("summary", event.title)
         component.add("location", event.address or event.venue)
         component.add("status", event.status)
@@ -73,6 +71,20 @@ def _calendar(events: list[Event], run_at: datetime) -> Calendar:
         component["LOCATION"].params["ALTREP"] = vText(event.venue)
         calendar.add_component(component)
     return calendar
+
+
+def _add_event_dates(component: ICalEvent, event: Event) -> None:
+    if event.end and event.end - event.start >= timedelta(days=1):
+        component.add("dtstart", event.start.date())
+        end_date = event.end.date()
+        if event.end.time() != time.min:
+            end_date += timedelta(days=1)
+        component.add("dtend", end_date)
+        return
+
+    component.add("dtstart", event.start)
+    if event.end:
+        component.add("dtend", event.end)
 
 
 def _description(event: Event) -> str:
